@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { register as registerCustomer, login as loginCustomer } from "../services/auth";
+import { registerServiceProvider, loginServiceProvider } from "../services/serviceProvider";
 
 /* ------------------- Decorative Droplets ---------------------- */
 const Droplets = () => {
   const [drops, setDrops] = useState([]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const temp = [];
     for (let i = 0; i < 50; i++) {
       temp.push({
@@ -38,11 +39,12 @@ const Droplets = () => {
 const Home = () => {
   const navigate = useNavigate();
   const [modalType, setModalType] = useState("");
-  const [roleChoice, setRoleChoice] = useState("");
+  const [roleChoice, setRoleChoice] = useState(""); // customer or provider
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
 
-  /* ------------------------- Logic (UNCHANGED) ------------------------- */
+  /* ------------------------- Handlers ------------------------- */
 
   const handleRoleSelect = (role) => {
     setRoleChoice(role);
@@ -69,19 +71,39 @@ const Home = () => {
     return Object.keys(temp).length === 0;
   };
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
-    alert(`Logged in as ${roleChoice}`);
-    navigate(
-      roleChoice === "customer" ? "/customer-dashboard" : "/provider-dashboard"
-    );
+    setLoading(true);
+    try {
+      let res;
+      if (roleChoice === "customer") {
+        res = await loginCustomer(formData); // call backend customer login
+      } else {
+        res = await loginServiceProvider(formData); // call backend provider login
+      }
 
-    setModalType("");
-    setRoleChoice("");
-    setErrors({});
-    setFormData({ email: "", password: "" });
+      // Assuming backend returns a token and user info
+      const token = res.data.token;
+      const user = res.data.user;
+
+      // Save token if needed
+      localStorage.setItem("token", token);
+
+      alert(`Logged in as ${roleChoice}: ${user.name}`);
+      navigate(roleChoice === "customer" ? "/customer-dashboard" : "/provider-dashboard");
+
+      setModalType("");
+      setRoleChoice("");
+      setErrors({});
+      setFormData({ email: "", password: "" });
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Login failed. Check credentials.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const closeModal = () => {
@@ -94,16 +116,16 @@ const Home = () => {
   /* -------------------------- UI ------------------------------ */
 
   return (
-    
-   <div className="relative min-h-[85vh] flex flex-col items-center justify-center overflow-hidden
+    <div className="relative min-h-[85vh] flex flex-col items-center justify-center overflow-hidden
      bg-linear-to-b from-[#18334f] to-[#445f7e] text-white">
-    
+
       {/* Small floating droplets */}
       <Droplets />
 
       {/* Title */}
-      <h1 class="text-5xl md:text-6xl font-extrabold mb-6 bg-clip-text text-transparent bg-linear-to-r from-[#ffffff] via-[#00ffff] to-[#ddb7c3] animate-gradient-x animate-soft-text-glow">
-        Welcome to Pro-Connect</h1>
+      <h1 className="text-5xl md:text-6xl font-extrabold mb-6 bg-clip-text text-transparent bg-linear-to-r from-[#ffffff] via-[#00ffff] to-[#ddb7c3] animate-gradient-x animate-soft-text-glow">
+        Welcome to Pro-Connect
+      </h1>
 
       {/* Sub-Title */}
       <p className="text-lg md:text-xl text-center mt-4 max-w-[600px] opacity-90 animate-fadeInSlow">
@@ -128,9 +150,10 @@ const Home = () => {
           Register
         </button>
       </div>
-      <div class="absolute -top-40 -left-40 w-96 h-96 bg-[#3fbec3] rounded-full opacity-10 animate-pulseSlow"></div>
-      <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-[#41d5da] rounded-full opacity-10 animate-pulseSlow"></div>
-      
+
+      <div className="absolute -top-40 -left-40 w-96 h-96 bg-[#3fbec3] rounded-full opacity-10 animate-pulseSlow"></div>
+      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-[#41d5da] rounded-full opacity-10 animate-pulseSlow"></div>
+
       {/* ------------------ Modal ------------------ */}
       {modalType && (
         <div className="fixed inset-0 bg-grey backdrop-blur-sm flex items-center justify-center z-100">
@@ -209,9 +232,10 @@ const Home = () => {
 
                 <button
                   type="submit"
-                  className="mt-3 py-3 bg-[#31d7c9] text-black font-bold rounded-xl hover:scale-105 transition"
+                  className={`mt-3 py-3 bg-[#31d7c9] text-black font-bold rounded-xl hover:scale-105 transition ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  disabled={loading}
                 >
-                  Login
+                  {loading ? "Logging in..." : "Login"}
                 </button>
               </form>
             )}

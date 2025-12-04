@@ -1,12 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-/*
-  CustomerRegistration.jsx
-  - Simple, clean UI, same theme as provider
-  - Validates required fields
-  - On success: navigate("/verification", { state: { userType: "customer" } })
-*/
+import axios from "axios";
 
 const provinces = [
   "Province 1","Province 2","Bagmati Province","Gandaki Province",
@@ -15,7 +9,7 @@ const provinces = [
 
 const districts = [
   "Kathmandu","Lalitpur","Bhaktapur","Pokhara","Chitwan","Dharan","Biratnagar"
-]; // shortened list for demo
+];
 
 const CustomerRegistration = () => {
   const navigate = useNavigate();
@@ -60,20 +54,28 @@ const CustomerRegistration = () => {
     return Object.keys(err).length === 0;
   };
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
+
     setSubmitting(true);
     const payload = { ...form, phone: `+977${form.phone}` };
-    console.log("Customer registered:", payload);
-    setTimeout(() => {
-      setSubmitting(false);
+
+    try {
+      const response = await axios.post("http://localhost:5000/api/customers/register", payload);
+      console.log("Customer registered:", response.data);
+      if(response.data.token) localStorage.setItem("token", response.data.token);
       navigate("/verification", { state: { userType: "customer" } });
-    }, 700);
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Registration failed");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#0D1B2A] to-[#415A77] p-6">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-[#0D1B2A] to-[#415A77] p-6">
       <form onSubmit={submit} className="w-full max-w-md bg-[#243240]/80 border border-gray-700 rounded-2xl p-6 shadow-xl">
         <h1 className="text-2xl font-extrabold text-white mb-2">Customer Registration</h1>
         <p className="text-sm text-gray-200 mb-4">Sign up to book trusted professionals near you.</p>
@@ -81,22 +83,19 @@ const CustomerRegistration = () => {
         <div className="space-y-3">
           <div>
             <label className="block text-sm text-white mb-1">Full Name <span className="text-red-400">*</span></label>
-            <input name="name" value={form.name} onChange={handleChange}
-              className="w-full p-3 rounded-md bg-white text-black" placeholder="Your name" />
+            <input name="name" value={form.name} onChange={handleChange} className="w-full p-3 rounded-md bg-white text-black" placeholder="Your name" />
             {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
           </div>
 
           <div>
             <label className="block text-sm text-white mb-1">Email <span className="text-red-400">*</span></label>
-            <input name="email" value={form.email} onChange={handleChange}
-              className="w-full p-3 rounded-md bg-white text-black" placeholder="you@email.com" />
+            <input name="email" value={form.email} onChange={handleChange} className="w-full p-3 rounded-md bg-white text-black" placeholder="you@email.com" />
             {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
           </div>
 
           <div>
             <label className="block text-sm text-white mb-1">Password <span className="text-red-400">*</span></label>
-            <input name="password" type="password" value={form.password} onChange={handleChange}
-              className="w-full p-3 rounded-md bg-white text-black" placeholder="At least 8 characters" />
+            <input name="password" type="password" value={form.password} onChange={handleChange} className="w-full p-3 rounded-md bg-white text-black" placeholder="At least 8 characters" />
             {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
           </div>
 
@@ -134,11 +133,11 @@ const CustomerRegistration = () => {
           </div>
         </div>
 
-        <button type="submit" disabled={submitting} className="w-full mt-4 py-3 rounded-full bg-gradient-to-r from-[#31d7c9] via-[#00F5FF] to-[#c13497] font-bold text-black shadow">
+        <button type="submit" disabled={submitting} className="w-full mt-4 py-3 rounded-full bg-linear-to-r from-[#31d7c9] via-[#00F5FF] to-[#c13497] font-bold text-black shadow">
           {submitting ? "Registering..." : "Register"}
         </button>
 
-        <p className="text-xs text-gray-300 mt-3">By registering you agree to Pro-Connect terms. This demo does not send files to server.</p>
+        <p className="text-xs text-gray-300 mt-3">By registering you agree to Pro-Connect terms.</p>
       </form>
     </div>
   );
