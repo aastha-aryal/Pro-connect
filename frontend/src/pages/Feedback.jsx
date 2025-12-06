@@ -43,7 +43,7 @@ const Feedback = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#18334f] to-[#445f7e] text-white flex flex-col items-center justify-start px-4 py-16">
+    <div className="relative min-h-screen overflow-hidden bg-linear-to-b from-[#18334f] to-[#445f7e] text-white flex flex-col items-center justify-start px-4 py-16">
 
       {/* Droplet Background */}
       <Droplets />
