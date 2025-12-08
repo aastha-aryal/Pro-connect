@@ -1,143 +1,306 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
-const provinces = [
-  "Province 1","Province 2","Bagmati Province","Gandaki Province",
-  "Lumbini Province","Karnali Province","Sudurpashchim Province"
-];
-
-const districts = [
-  "Kathmandu","Lalitpur","Bhaktapur","Pokhara","Chitwan","Dharan","Biratnagar"
+const provincesList = [
+  "Province 1",
+  "Province 2",
+  "Bagmati Province",
+  "Gandaki Province",
+  "Lumbini Province",
+  "Karnali Province",
+  "Sudurpashchim Province"
 ];
 
 const CustomerRegistration = () => {
   const navigate = useNavigate();
 
+  const [step, setStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+  const [addressData, setAddressData] = useState({});
+
   const [form, setForm] = useState({
-    name: "",
+    fullName: "",
     email: "",
-    password: "",
     phone: "",
+    password: "",
+    confirmPassword: "",
     province: "",
     district: "",
-    municipality: ""
+    city: "",
+    ward: ""
   });
 
   const [errors, setErrors] = useState({});
-  const [submitting, setSubmitting] = useState(false);
+  const [districtOptions, setDistrictOptions] = useState([]);
+  const [municipalityOptions, setMunicipalityOptions] = useState([]);
+  const [wardOptions, setWardOptions] = useState([]);
 
-  const handleChange = (e) => {
+  useEffect(() => {
+    // Fetch JSON from public folder
+    fetch("/addressData.json")
+      .then((res) => res.json())
+      .then((data) => setAddressData(data))
+      .catch((err) => console.error("Error loading addressData:", err));
+  }, []);
+
+  const handleInput = (e) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
   };
 
-  const handlePhone = (e) => {
-    const v = e.target.value.replace(/\D/g, "");
-    if (v.length <= 10) setForm((p) => ({ ...p, phone: v }));
+  const handlePhoneChange = (e) => {
+    const val = e.target.value.replace(/\D/g, "");
+    if (val.length <= 10) setForm((p) => ({ ...p, phone: val }));
   };
 
-  const validate = () => {
-    const err = {};
-    if (!form.name) err.name = "Full name required";
-    if (!form.email) err.email = "Email required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) err.email = "Invalid email";
-    if (!form.password) err.password = "Password required";
-    else if (form.password.length < 8) err.password = "At least 8 characters";
-    if (!form.phone) err.phone = "Phone required";
-    else if (form.phone.length !== 10) err.phone = "Phone must be 10 digits";
-    if (!form.province) err.province = "Select province";
-    if (!form.district) err.district = "Select district";
-    if (!form.municipality) err.municipality = "Municipality required";
+  const handleProvinceChange = (e) => {
+    const province = e.target.value;
+    setForm((prev) => ({ ...prev, province, district: "", city: "", ward: "" }));
+    setDistrictOptions(addressData[province] ? Object.keys(addressData[province]) : []);
+    setMunicipalityOptions([]);
+    setWardOptions([]);
+  };
 
+  const handleDistrictChange = (e) => {
+    const district = e.target.value;
+    setForm((prev) => ({ ...prev, district, city: "", ward: "" }));
+    setMunicipalityOptions(
+      addressData[form.province]?.[district] ? Object.keys(addressData[form.province][district]) : []
+    );
+    setWardOptions([]);
+  };
+
+  const handleMunicipalityChange = (e) => {
+    const city = e.target.value;
+    setForm((prev) => ({ ...prev, city, ward: "" }));
+    setWardOptions(
+      addressData[form.province]?.[form.district]?.[city] || []
+    );
+  };
+
+  const handleWardChange = (e) => {
+    setForm((prev) => ({ ...prev, ward: e.target.value }));
+  };
+
+  const validateStep = () => {
+    const err = {};
+    if (step === 1) {
+      if (!form.fullName) err.fullName = "Full name required";
+      if (!form.email) err.email = "Email required";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) err.email = "Invalid email";
+      if (!form.phone) err.phone = "Phone required";
+      else if (form.phone.length !== 10) err.phone = "Phone must be 10 digits";
+      if (!form.password) err.password = "Password required";
+      else if (form.password.length < 8) err.password = "Password must be >= 8 chars";
+      if (form.password !== form.confirmPassword) err.confirmPassword = "Password mismatch";
+    } else if (step === 2) {
+      if (!form.province) err.province = "Province required";
+      if (!form.district) err.district = "District required";
+      if (!form.city) err.city = "City required";
+    }
     setErrors(err);
     return Object.keys(err).length === 0;
   };
 
-  const submit = async (e) => {
+  const next = () => {
+    if (validateStep()) setStep((s) => Math.min(2, s + 1));
+  };
+
+  const prev = () => setStep((s) => Math.max(1, s - 1));
+
+  const submit = (e) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!validateStep()) return;
 
     setSubmitting(true);
-    const payload = { ...form, phone: `+977${form.phone}` };
-
-    try {
-      const response = await axios.post("http://localhost:5000/api/customers/register", payload);
-      console.log("Customer registered:", response.data);
-      if(response.data.token) localStorage.setItem("token", response.data.token);
-      navigate("/verification", { state: { userType: "customer" } });
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Registration failed");
-    } finally {
+    setTimeout(() => {
+      console.log("Customer registration data:", form);
       setSubmitting(false);
-    }
+      navigate("/verification", { state: { userType: "customer" } });
+    }, 800);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-linear-to-b from-[#0D1B2A] to-[#415A77] p-6">
-      <form onSubmit={submit} className="w-full max-w-md bg-[#243240]/80 border border-gray-700 rounded-2xl p-6 shadow-xl">
-        <h1 className="text-2xl font-extrabold text-white mb-2">Customer Registration</h1>
-        <p className="text-sm text-gray-200 mb-4">Sign up to book trusted professionals near you.</p>
+    <div className="min-h-screen flex items-center justify-center bg-[#f5f2ea] p-6">
+      <form
+        className="w-full max-w-2xl bg-white p-8 rounded-2xl shadow-xl border border-[#e5d9c4]"
+        onSubmit={submit}
+      >
+        <h1 className="text-2xl font-bold mb-4 text-gray-800">Customer Registration</h1>
 
-        <div className="space-y-3">
-          <div>
-            <label className="block text-sm text-white mb-1">Full Name <span className="text-red-400">*</span></label>
-            <input name="name" value={form.name} onChange={handleChange} className="w-full p-3 rounded-md bg-white text-black" placeholder="Your name" />
-            {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm text-white mb-1">Email <span className="text-red-400">*</span></label>
-            <input name="email" value={form.email} onChange={handleChange} className="w-full p-3 rounded-md bg-white text-black" placeholder="you@email.com" />
-            {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm text-white mb-1">Password <span className="text-red-400">*</span></label>
-            <input name="password" type="password" value={form.password} onChange={handleChange} className="w-full p-3 rounded-md bg-white text-black" placeholder="At least 8 characters" />
-            {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm text-white mb-1">Phone <span className="text-red-400">*</span></label>
-            <div className="flex items-center bg-white rounded-md">
-              <div className="px-3 text-black font-semibold">+977</div>
-              <input name="phone" value={form.phone} onChange={handlePhone} className="flex-1 p-3 bg-transparent text-black" placeholder="10-digit number" />
-            </div>
-            {errors.phone && <p className="text-red-400 text-sm mt-1">{errors.phone}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm text-white mb-1">Province <span className="text-red-400">*</span></label>
-            <select name="province" value={form.province} onChange={handleChange} className="w-full p-3 rounded-md bg-white text-black">
-              <option value="">Select Province</option>
-              {provinces.map((p) => <option key={p} value={p}>{p}</option>)}
-            </select>
-            {errors.province && <p className="text-red-400 text-sm mt-1">{errors.province}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm text-white mb-1">District <span className="text-red-400">*</span></label>
-            <select name="district" value={form.district} onChange={handleChange} className="w-full p-3 rounded-md bg-white text-black">
-              <option value="">Select District</option>
-              {districts.map((d) => <option key={d} value={d}>{d}</option>)}
-            </select>
-            {errors.district && <p className="text-red-400 text-sm mt-1">{errors.district}</p>}
-          </div>
-
-          <div>
-            <label className="block text-sm text-white mb-1">Municipality <span className="text-red-400">*</span></label>
-            <input name="municipality" value={form.municipality} onChange={handleChange} className="w-full p-3 rounded-md bg-white text-black" placeholder="Town / Municipality" />
-            {errors.municipality && <p className="text-red-400 text-sm mt-1">{errors.municipality}</p>}
-          </div>
+        {/* Progress bar */}
+        <div className="w-full bg-gray-200 rounded-full h-2 mb-6 overflow-hidden">
+          <div className="h-2 bg-[#c49b6f]" style={{ width: `${(step / 2) * 100}%` }} />
         </div>
 
-        <button type="submit" disabled={submitting} className="w-full mt-4 py-3 rounded-full bg-linear-to-r from-[#31d7c9] via-[#00F5FF] to-[#c13497] font-bold text-black shadow">
-          {submitting ? "Registering..." : "Register"}
-        </button>
+        {step === 1 && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm mb-1 text-gray-700">Full Name *</label>
+              <input
+                name="fullName"
+                value={form.fullName}
+                onChange={handleInput}
+                placeholder="Your full name"
+                className="w-full p-3 rounded-md border bg-[#FFFDF9]"
+              />
+              {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>}
+            </div>
 
-        <p className="text-xs text-gray-300 mt-3">By registering you agree to Pro-Connect terms.</p>
+            <div>
+              <label className="block text-sm mb-1 text-gray-700">Email *</label>
+              <input
+                name="email"
+                value={form.email}
+                onChange={handleInput}
+                placeholder="you@email.com"
+                className="w-full p-3 rounded-md border bg-[#FFFDF9]"
+              />
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm mb-1 text-gray-700">Phone *</label>
+              <input
+                name="phone"
+                value={form.phone}
+                onChange={handlePhoneChange}
+                placeholder="10-digit phone"
+                className="w-full p-3 rounded-md border bg-[#FFFDF9]"
+              />
+              {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">Password *</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={form.password}
+                  onChange={handleInput}
+                  placeholder="Password"
+                  className="w-full p-3 rounded-md border bg-[#FFFDF9]"
+                />
+                {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">Confirm Password *</label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={form.confirmPassword}
+                  onChange={handleInput}
+                  placeholder="Confirm Password"
+                  className="w-full p-3 rounded-md border bg-[#FFFDF9]"
+                />
+                {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm mb-1 text-gray-700">Province *</label>
+              <select
+                name="province"
+                value={form.province}
+                onChange={handleProvinceChange}
+                className="w-full p-3 rounded-md border bg-[#FFFDF9]"
+              >
+                <option value="">Select Province</option>
+                {provincesList.map((p) => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
+              {errors.province && <p className="text-red-500 text-sm mt-1">{errors.province}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm mb-1 text-gray-700">District *</label>
+              <select
+                name="district"
+                value={form.district}
+                onChange={handleDistrictChange}
+                className="w-full p-3 rounded-md border bg-[#FFFDF9]"
+                disabled={!districtOptions.length}
+              >
+                <option value="">Select District</option>
+                {districtOptions.map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+              {errors.district && <p className="text-red-500 text-sm mt-1">{errors.district}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm mb-1 text-gray-700">City / Municipality *</label>
+              <select
+                name="city"
+                value={form.city}
+                onChange={handleMunicipalityChange}
+                className="w-full p-3 rounded-md border bg-[#FFFDF9]"
+                disabled={!municipalityOptions.length}
+              >
+                <option value="">Select City / Municipality</option>
+                {municipalityOptions.map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+              {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+            </div>
+
+            {wardOptions.length > 0 && (
+              <div>
+                <label className="block text-sm mb-1 text-gray-700">Ward (Optional)</label>
+                <select
+                  name="ward"
+                  value={form.ward}
+                  onChange={handleWardChange}
+                  className="w-full p-3 rounded-md border bg-[#FFFDF9]"
+                >
+                  <option value="">Select Ward</option>
+                  {wardOptions.map((w) => (
+                    <option key={w} value={w}>{w}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="flex justify-between mt-6">
+          {step > 1 && (
+            <button
+              type="button"
+              onClick={prev}
+              className="px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400 font-semibold"
+            >
+              Previous
+            </button>
+          )}
+
+          {step < 2 ? (
+            <button
+              type="button"
+              onClick={next}
+              className="px-5 py-2 bg-[#c49b6f] text-white rounded-xl font-bold hover:opacity-90"
+            >
+              Continue
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={submitting}
+              className="px-5 py-2 bg-[#a67c52] text-white rounded-xl font-bold disabled:opacity-60"
+            >
+              {submitting ? "Submitting..." : "Submit & Verify"}
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );

@@ -13,13 +13,13 @@ const SERVICES = [
   { id: 5, title: "House Help", img: "/assets/services/cleaner.jpg" },
   { id: 6, title: "Babysitters", img: "/assets/services/babysitter.jpg" },
   { id: 7, title: "Beauty & Salon", img: "/assets/services/beautician.jpg" },
-  { id: 8, title: "Event Decorators / Band Baja", img: "/assets/services/bandbaja.jpg" },
+  { id: 8, title: "Event Decorators", img: "/assets/services/event decorators.jpg" },
   { id: 9, title: "Carpenter", img: "/assets/services/carpenter.jpg" },
   { id: 10, title: "Photographer", img: "/assets/services/photographer.jpg" },
   { id: 11, title: "Band Baja", img: "/assets/services/bandbaja.jpg" },
   { id: 12, title: "Private Chef", img: "/assets/services/chef.jpg" },
   { id: 13, title: "Locksmith", img: "/assets/services/locksmith.jpg" },
-  { id: 14, title: "Boutiques / Tailoring", img: "/assets/services/boutique.jpg" },
+  { id: 14, title: "Boutiques", img: "/assets/services/boutique.jpg" },
   { id: 15, title: "Movers & Packers", img: "/assets/services/movers.jpg" },
   { id: 16, title: "Catering Server", img: "/assets/services/catering.jpg" },
 ];
@@ -138,7 +138,7 @@ const Home = () => {
       {/* SERVICES */}
       <section id="services" className="py-16">
         <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">Popular Services</h2>
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Our Services</h2>
           <p className="text-gray-600 mb-6">Common tasks solved by local professionals.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {SERVICES.map((s) => (
@@ -163,12 +163,12 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h2 className="text-3xl font-bold mb-8 text-gray-800">How it works</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {["Tell Us What You Need", "Get Matched", "Compare & Book", "Rate & Review"].map((step, idx) => (
+            {["Select the service of your need", "Get Matched", "Compare & Book", "Rate & Review"].map((step, idx) => (
               <div key={idx} className="bg-white p-6 border rounded-lg hover:shadow-xl transition transform hover:scale-105">
                 <div className="text-3xl font-bold mb-2">{idx + 1}</div>
                 <h4 className="font-semibold text-gray-800">{step}</h4>
                 <p className="text-gray-500 text-sm mt-1">
-                  {step === "Tell Us What You Need" && "Describe the task and preferred time."}
+                  {step === "Select the service of your need" && "Describe the task and preferred time."}
                   {step === "Get Matched" && "We show qualified professionals nearby."}
                   {step === "Compare & Book" && "View reviews and transparent pricing."}
                   {step === "Rate & Review" && "Share feedback to help others."}

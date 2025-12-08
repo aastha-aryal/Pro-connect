@@ -1,66 +1,44 @@
 import React from "react";
-import { motion } from "framer-motion";
 
 const Legal = () => {
   return (
-    <div className="min-h-screen px-4 py-16 bg-[#3b5168]">
-      <h1 className="text-4xl font-bold text-center mb-12 text-[#1B263B]">
+    <div className="min-h-screen flex flex-col items-center justify-start bg-linear-to-b from-[#f5fbff] to-[#e9f6ff] px-4 py-16">
+      
+      <h1 className="text-4xl md:text-5xl font-bold mb-12 text-[#0b4a6f] text-center">
         Legal Information
       </h1>
 
-      <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
+      <div className="max-w-3xl w-full space-y-8">
         {/* Privacy Policy */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="bg-[#d1d9e0] p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
-        >
-          <h2 className="text-2xl font-semibold mb-4 text-[#0D1B2A]">
+        <div className="bg-white/90 border border-[#b7ecff] p-6 rounded-3xl shadow-xl">
+          <h2 className="text-2xl font-semibold mb-4 text-[#0b4a6f]">
             Privacy Policy
           </h2>
-          <p className="text-gray-800 mb-3">
-            At <span className="font-semibold text-[#00F5FF]">Pro-Connect</span>, we value your privacy. We collect only necessary information such as name, email, phone, and optionally your location to connect you with service providers.
-          </p>
-          <p className="text-gray-800 mb-3">
-            Your data is never sold to third parties. We share information only with providers with your consent, and only for the purpose of connecting you for services.
-          </p>
-          <p className="text-gray-800 mb-3">
-            We use reasonable security measures to protect your information. You can update or delete your profile anytime.
-          </p>
-          <p className="text-gray-800">
-            Policy updates may occur occasionally, and users will be notified of any changes.
-          </p>
-        </motion.div>
+          <ul className="list-disc list-inside space-y-2 text-[#3f6b82]">
+            <li>We collect only necessary information: name, email, phone, and optionally location.</li>
+            <li>Your data is never sold to third parties.</li>
+            <li>Information is shared only with providers with your consent, for service connection purposes.</li>
+            <li>We implement reasonable security measures to protect your information.</li>
+            <li>You can update or delete your profile anytime.</li>
+            <li>Policy updates may occur occasionally, and users will be notified of changes.</li>
+          </ul>
+        </div>
 
         {/* Terms & Conditions */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          viewport={{ once: true }}
-          className="bg-[#d1d9e0] p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
-        >
-          <h2 className="text-2xl font-semibold mb-4 text-[#0D1B2A]">
+        <div className="bg-white/90 border border-[#b7ecff] p-6 rounded-3xl shadow-xl">
+          <h2 className="text-2xl font-semibold mb-4 text-[#0b4a6f]">
             Terms & Conditions
           </h2>
-          <p className="text-gray-800 mb-3">
-            By using <span className="font-semibold text-[#00F5FF]">Pro-Connect</span>, you agree to provide accurate information and follow platform rules. You must interact respectfully with service providers and other users.
-          </p>
-          <p className="text-gray-800 mb-3">
-            Pro-Connect is a platform to connect customers and providers; we do not guarantee the quality of services. Fees are negotiated directly between the customer and provider before booking.
-          </p>
-          <p className="text-gray-800 mb-3">
-            Misuse of the platform, fraudulent activity, or harassment may lead to account suspension or termination.
-          </p>
-          <p className="text-gray-800 mb-3">
-            The platform operates under the laws of Nepal, and terms may be updated from time to time.
-          </p>
-          <p className="text-gray-800">
-            Users are responsible for understanding and complying with these terms.
-          </p>
-        </motion.div>
+          <ul className="list-disc list-inside space-y-2 text-[#3f6b82]">
+            <li>Users must provide accurate information and follow platform rules.</li>
+            <li>Interactions with service providers and other users must be respectful.</li>
+            <li>Pro-Connect connects customers and providers; service quality is not guaranteed.</li>
+            <li>Fees are negotiated directly between customer and provider before booking.</li>
+            <li>Misuse, fraudulent activity, or harassment may lead to account suspension or termination.</li>
+            <li>The platform operates under the laws of Nepal; terms may be updated from time to time.</li>
+            <li>Users are responsible for understanding and complying with these terms.</li>
+          </ul>
+        </div>
       </div>
     </div>
   );

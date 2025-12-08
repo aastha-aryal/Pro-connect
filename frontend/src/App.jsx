@@ -6,7 +6,6 @@ import Loader from "./components/Loader";
 // Pages
 import Home from "./pages/Home";
 import About from "./pages/About";
-import Services from "./pages/Services";
 import Blog from "./pages/Blog";
 import Feedback from "./pages/Feedback";
 import Faqs from "./pages/Faqs";
@@ -34,7 +33,6 @@ function App() {
             <Route path="/blog" element={<Blog />} />
             <Route path="/home" element={<Home />} />
             <Route path="/about" element={<About />} />
-            <Route path="/services" element={<Services />} />
             <Route path="/feedback" element={<Feedback />} />
             <Route path="/faq" element={<Faqs />} />
             <Route path="/legal" element={<Legal />} />
