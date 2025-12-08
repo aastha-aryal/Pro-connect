@@ -1,0 +1,31 @@
+# FRONTEND
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.env
+frontend/.env.local
+frontend/.env.development
+frontend/.env.production
+frontend/.env.test
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# BACKEND
+backend/node_modules/
+backend/.env
+backend/.env.local
+backend/.env.development
+backend/.env.production
+backend/.env.test
+backend/npm-debug.log*
+backend/yarn-debug.log*
+backend/yarn-error.log*
+
+# COMMON IGNORES
+.DS_Store
+.vscode/
+*.log
+
+# System files
+Thumbs.db
