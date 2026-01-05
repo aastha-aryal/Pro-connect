@@ -1,30 +1,27 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import addresData from "../data/addresData.json";  
 
 const servicesList = [
-  "Plumber","Electrician","Home Tutors","Painter","House Help","Babysitters",
-  "Beauty & Salon","Event Decorators","Carpenter","Photographer","Interior Designer",
-  "Private Chef","Locksmith","Boutiques","Movers & Packers","Catering Server"
+  "Plumber", "Electrician", "Home Tutors", "Painter", "House Help", "Babysitters",
+  "Beauty & Salon", "Event Decorators", "Carpenter", "Photographer", "Band Baja",
+  "Private Chef", "Locksmith", "Boutiques", "Movers & Packers", "Catering Server"
+];
+const countryCodes = [
+  { code: "+977", label: "Nepal" },
+  { code: "+91", label: "India" },
+  { code: "+880", label: "Bangladesh" },
+  { code: "+94", label: "Sri Lanka" },
+  { code: "+95", label: "Myanmar" },
+  { code: "+86", label: "China" },
+  { code: "+81", label: "Japan" },
+  { code: "+82", label: "South Korea" },
+  { code: "+1", label: "USA / Canada" },
+  { code: "+44", label: "UK" },
+  { code: "+971", label: "UAE" }
 ];
 
-const provinces = [
-  "Province 1","Province 2","Bagmati Province","Gandaki Province",
-  "Lumbini Province","Karnali Province","Sudurpashchim Province"
-];
-
-const allDistricts = [
-  "Achham","Arghakhanchi","Baglung","Baitadi","Bajhang","Bajura","Banke","Bara","Bardiya",
-  "Bhaktapur","Bhojpur","Chitwan","Dadeldhura","Dailekh","Dang","Darchula","Dhading","Dhankuta",
-  "Dhanusha","Dolakha","Dolpa","Doti","Gorkha","Gulmi","Humla","Ilam","Jajarkot","Jhapa",
-  "Jumla","Kailali","Kalikot","Kanchanpur","Kapilvastu","Kaski","Kathmandu","Kavrepalanchok",
-  "Khotang","Lalitpur","Lamjung","Mahottari","Makwanpur","Manang","Morang","Mugu","Mustang",
-  "Myagdi","Nawalpur","Nuwakot","Okhaldhunga","Palpa","Panchthar","Parbat","Parsa","Pyuthan",
-  "Ramechhap","Rasuwa","Rautahat","Rolpa","Rukum East","Rukum West","Rupandehi","Salyan",
-  "Sankhuwasabha","Saptari","Sarlahi","Sindhuli","Sindhupalchok","Siraha","Solukhumbu",
-  "Sunsari","Surkhet","Syangja","Tanahun","Taplejung","Terhathum","Udayapur"
-];
-
-const idTypes = ["Citizenship","National ID","Passport"];
+const idTypes = ["Citizenship", "National ID", "Passport"];
 
 const ProviderRegistration = () => {
   const navigate = useNavigate();
@@ -32,19 +29,25 @@ const ProviderRegistration = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const [form, setForm] = useState({
-    fullName: "", email: "", phone: "",
+    fullName: "", email: "", phone: "", countryCode: "+977", gender: "",
     password: "", confirmPassword: "",
     service: "", experience: "", skills: "",
-    province: "", district: "", Municipality: "",
-    bio: "", emergencyName: "", emergencyPhone: "",
+    province: "", district: "", municipality: "", wardNo: "",
+    bio: "",
     profilePhoto: null, idType: "", idFile: null, cvFile: null,
-    portfolio: [], extraCert: null
+    portfolio: [], extraCert:  [{ file: null }]
   });
 
   const [errors, setErrors] = useState({});
 
-  const handleInput = (e) => {
-    setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+  // for dynamic location selects
+  const [districts, setDistricts] = useState([]);
+  const [municipalities, setMunicipalities] = useState([]);
+  const [wards, setWards] = useState([]);
+
+ const handleInput = (e) => {
+    const { name, value } = e.target;
+    setForm((p) => ({ ...p, [name]: value }));
   };
 
   const handleFile = (e) => {
@@ -56,12 +59,28 @@ const ProviderRegistration = () => {
     }
   };
 
-  const handlePhoneChange = (e, field = "phone") => {
+  const handleExtraCertChange = (index, file) => {
+    const updated = [...form.extraCert];
+    updated[index].file = file;
+    setForm((p) => ({ ...p, extraCert: updated }));
+  };
+
+  const addExtraCert = () => {
+    setForm((p) => ({
+      ...p,
+      extraCert: [...p.extraCert, { file: null }]
+    }));
+  };
+
+  const handlePhoneChange = (e) => {
     const number = e.target.value.replace(/\D/g, "");
     if (number.length <= 10) {
-      setForm((prev) => ({ ...prev, [field]: number }));
+      setForm((p) => ({ ...p, phone: number }));
     }
   };
+
+
+  const isTooLarge = (file) => file?.size > 5 * 1024 * 1024;
 
   const validateStep = () => {
     const err = {};
@@ -71,14 +90,18 @@ const ProviderRegistration = () => {
       if (!form.email) err.email = "Email required";
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
         err.email = "Invalid email format";
+
       if (!form.phone) err.phone = "Phone required";
-      else if (form.phone.length !== 10)
-        err.phone = "Phone must be 10 digits";
+      else if (form.phone.length !== 10) err.phone = "Phone must be 10 digits";
+       if (!form.gender) err.gender = "Gender required";
       if (!form.password) err.password = "Password required";
-      else if (form.password.length < 8)
-        err.password = "Min. 8 characters";
+      else if (form.password.length < 8) err.password = "Min. 8 characters";
+
       if (form.password !== form.confirmPassword)
         err.confirmPassword = "Password mismatch";
+
+      if (!form.profilePhoto) err.profilePhoto = "Profile photo required";
+      else if (isTooLarge(form.profilePhoto)) err.profilePhoto = "Max size 5 MB";
     }
 
     if (step === 2) {
@@ -90,13 +113,24 @@ const ProviderRegistration = () => {
     if (step === 3) {
       if (!form.province) err.province = "Province required";
       if (!form.district) err.district = "District required";
-      if (!form.Municipality) err.Municipality = "Municipality required";
+      if (!form.municipality) err.municipality = "Municipality required";
+      if (!form.wardNo) err.wardNo = "Ward number required";
     }
 
     if (step === 4) {
       if (!form.idType) err.idType = "Select your ID type";
-      if (!form.idFile) err.idFile = "Upload ID document";
+
+      if (!form.idFile) err.idFile = "Upload ID";
+      else if (isTooLarge(form.idFile)) err.idFile = "Max size 5 MB";
+
       if (!form.cvFile) err.cvFile = "Upload CV";
+      else if (isTooLarge(form.cvFile)) err.cvFile = "Max size 5 MB";
+
+      if (form.portfolio.some((f) => isTooLarge(f)))
+        err.portfolio = "Each image must be under 5 MB";
+
+      if (form.extraCert.some((c) => c.file && isTooLarge(c.file)))
+        err.extraCert = "Each certificate must be under 5 MB";
     }
 
     setErrors(err);
@@ -104,9 +138,7 @@ const ProviderRegistration = () => {
   };
 
   const next = () => {
-    if (validateStep()) {
-      setStep((s) => s + 1);
-    }
+    if (validateStep()) setStep((s) => s + 1);
   };
 
   const prev = () => setStep((s) => s - 1);
@@ -117,12 +149,49 @@ const ProviderRegistration = () => {
 
     setSubmitting(true);
     setTimeout(() => {
-      setSubmitting(false);
       navigate("/verification", { state: { userType: "provider" } });
     }, 800);
   };
 
   const fileName = (f) => (f ? f.name : "No file chosen");
+
+  // --- Handlers for dynamic location selects ---
+  const handleProvinceChange = (e) => {
+    const prov = e.target.value;
+    setForm((p) => ({ ...p, province: prov, district: "", municipality: "", wardNo: "" }));
+    if (addresData[prov]) {
+      setDistricts(Object.keys(addresData[prov]));
+    } else {
+      setDistricts([]);
+    }
+    setMunicipalities([]);
+    setWards([]);
+  };
+
+  const handleDistrictChange = (e) => {
+    const dist = e.target.value;
+    setForm((p) => ({ ...p, district: dist, municipality: "", wardNo: "" }));
+    if (addresData[form.province] && addresData[form.province][dist]) {
+      setMunicipalities(Object.keys(addresData[form.province][dist]));
+    } else {
+      setMunicipalities([]);
+    }
+    setWards([]);
+  };
+
+  const handleMunicipalityChange = (e) => {
+    const mun = e.target.value;
+    setForm((p) => ({ ...p, municipality: mun, wardNo: "" }));
+    if (
+      addresData[form.province] &&
+      addresData[form.province][form.district] &&
+      addresData[form.province][form.district][mun]
+    ) {
+      setWards(addresData[form.province][form.district][mun]);
+    } else {
+      setWards([]);
+    }
+  };
 
   return (
     <div className="min-h-screen flex justify-center items-center px-4 py-8 bg-[#F7F2E8]">
@@ -136,13 +205,11 @@ const ProviderRegistration = () => {
             <h1 className="text-2xl font-bold text-gray-900">
               Pro-Connect Provider Registration
             </h1>
-            <p className="text-sm text-gray-600">
-              Build your professional profile
-            </p>
+            <p className="text-sm text-gray-600">Build your professional profile</p>
           </div>
           <div className="text-right">
             <p className="text-gray-600 text-sm">Step</p>
-            <p className="text-lg font-semibold text-[#8B4513]">{step} / 5</p>
+            <p className="text-lg font-semibold text-[#8B4513]">{step} / 4</p>
           </div>
         </div>
 
@@ -150,13 +217,11 @@ const ProviderRegistration = () => {
         <div className="w-full h-2 rounded-full bg-gray-300 mb-6">
           <div
             className="h-2 bg-[#C6A77B] rounded-full"
-            style={{ width: `${(step / 5) * 100}%` }}
+            style={{ width: `${(step / 4) * 100}%` }}
           ></div>
         </div>
 
-        {/* Steps */}
         <div className="space-y-6">
-
           {/* STEP 1 */}
           {step === 1 && (
             <div>
@@ -164,8 +229,7 @@ const ProviderRegistration = () => {
                 Basic Information
               </h2>
               <div className="grid md:grid-cols-2 gap-4">
-
-                {/* Full name */}
+                {/* fullName, email, phone, profilePhoto, password, confirmPassword */}
                 <div>
                   <label className="text-sm font-medium">Full Name *</label>
                   <input
@@ -180,14 +244,13 @@ const ProviderRegistration = () => {
                   )}
                 </div>
 
-                {/* Email */}
                 <div>
                   <label className="text-sm font-medium">Email *</label>
                   <input
                     name="email"
                     value={form.email}
                     onChange={handleInput}
-                    placeholder="example@email.com"
+                    placeholder="example@gmail.com"
                     className="w-full p-3 rounded-md border bg-[#FFFDF9]"
                   />
                   {errors.email && (
@@ -195,26 +258,60 @@ const ProviderRegistration = () => {
                   )}
                 </div>
 
-                {/* Phone */}
                 <div>
-                  <label className="text-sm font-medium">Phone *</label>
-                  <input
-                    name="phone"
-                    value={form.phone}
-                    onChange={(e) => handlePhoneChange(e)}
-                    placeholder="10-digit phone"
-                    className="w-full p-3 rounded-md border bg-[#FFFDF9]"
-                  />
-                  {errors.phone && (
-                    <p className="text-red-500 text-sm">{errors.phone}</p>
-                  )}
-                </div>
 
-                {/* Photo */}
-                <div>
-                  <label className="text-sm font-medium">
-                    Profile Photo (optional)
+        {/* Phone with country code */}
+            <label className="text-sm font-medium">Phone *</label>
+            <div className="flex gap-2">
+              <select
+                name="countryCode"
+                value={form.countryCode}
+                onChange={handleInput}
+                className="w-full p-2 rounded-md border bg-[#FFFDF9]"
+              >
+                {countryCodes.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.label} ({c.code})
+                  </option>
+                ))}
+              </select>
+              <input
+                value={form.phone}
+                onChange={handlePhoneChange}
+                className="w-full p-2 rounded-md border bg-[#FFFDF9]"
+                placeholder="98XXXXXXXX"
+              />
+            </div>
+
+            {/* Gender */}
+            <div className="mt-4">
+              <label className="text-sm font-medium block mb-1">Gender *</label>
+              <div className="flex gap-6">
+                {["Male", "Female", "Other"].map((g) => 
+                  <label key={g} className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value={g}
+                      checked={form.gender === g}
+                      onChange={handleInput}
+                      className="w-full p-2 rounded-md border bg-[#FFFDF9]"
+                    />
+                    {g}
                   </label>
+                )}
+              </div>
+              {errors.gender && (
+                <p className="text-red-500 text-sm">{errors.gender}</p>
+              )}
+            </div>
+                </div>(
+        )
+
+
+                <div>
+                  <label className="text-sm font-medium">Profile Photo *</label>
+                  <p className="text-xs text-gray-600 -mt-1 mb-1">Max size: 5 MB</p>
                   <input
                     type="file"
                     name="profilePhoto"
@@ -225,9 +322,11 @@ const ProviderRegistration = () => {
                   <p className="text-xs text-gray-600 mt-1">
                     {fileName(form.profilePhoto)}
                   </p>
+                  {errors.profilePhoto && (
+                    <p className="text-red-500 text-sm">{errors.profilePhoto}</p>
+                  )}
                 </div>
 
-                {/* Password */}
                 <div>
                   <label className="text-sm font-medium">Password *</label>
                   <input
@@ -243,11 +342,8 @@ const ProviderRegistration = () => {
                   )}
                 </div>
 
-                {/* Confirm password */}
                 <div>
-                  <label className="text-sm font-medium">
-                    Confirm Password *
-                  </label>
+                  <label className="text-sm font-medium">Confirm Password *</label>
                   <input
                     type="password"
                     name="confirmPassword"
@@ -272,7 +368,6 @@ const ProviderRegistration = () => {
               <h2 className="text-lg font-semibold text-gray-900 mb-2">
                 Professional Info
               </h2>
-
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Service *</label>
@@ -293,9 +388,7 @@ const ProviderRegistration = () => {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium">
-                    Years of Experience *
-                  </label>
+                  <label className="text-sm font-medium">Years of Experience *</label>
                   <input
                     type="number"
                     name="experience"
@@ -346,19 +439,22 @@ const ProviderRegistration = () => {
               <h2 className="text-lg font-semibold text-gray-900 mb-2">
                 Location Details
               </h2>
-
               <div className="grid md:grid-cols-3 gap-4">
+
+                {/* Province */}
                 <div>
                   <label className="text-sm font-medium">Province *</label>
                   <select
                     name="province"
                     value={form.province}
-                    onChange={handleInput}
+                    onChange={handleProvinceChange}
                     className="w-full p-3 rounded-md border bg-[#FFFDF9]"
                   >
                     <option value="">Select Province</option>
-                    {provinces.map((p) => (
-                      <option key={p}>{p}</option>
+                    {Object.keys(addresData).map((prov) => (
+                      <option key={prov} value={prov}>
+                        {prov}
+                      </option>
                     ))}
                   </select>
                   {errors.province && (
@@ -366,17 +462,21 @@ const ProviderRegistration = () => {
                   )}
                 </div>
 
+                {/* District */}
                 <div>
                   <label className="text-sm font-medium">District *</label>
                   <select
                     name="district"
                     value={form.district}
-                    onChange={handleInput}
+                    onChange={handleDistrictChange}
                     className="w-full p-3 rounded-md border bg-[#FFFDF9]"
+                    disabled={!districts.length}
                   >
                     <option value="">Select District</option>
-                    {allDistricts.map((d) => (
-                      <option key={d}>{d}</option>
+                    {districts.map((dist) => (
+                      <option key={dist} value={dist}>
+                        {dist}
+                      </option>
                     ))}
                   </select>
                   {errors.district && (
@@ -384,21 +484,52 @@ const ProviderRegistration = () => {
                   )}
                 </div>
 
+                {/* Municipality */}
                 <div>
-                  <label className="text-sm font-medium">
-                   Municipality *
-                  </label>
-                  <input
-                    name="Municipality"
-                    value={form.Municipality}
-                    onChange={handleInput}
+                  <label className="text-sm font-medium">Municipality *</label>
+                  <select
+                    name="municipality"
+                    value={form.municipality}
+                    onChange={handleMunicipalityChange}
                     className="w-full p-3 rounded-md border bg-[#FFFDF9]"
-                    placeholder="e.g. Lalitpur"
-                  />
-                  {errors.Municipality && (
-                    <p className="text-red-500 text-sm">{errors.Municipality}</p>
+                    disabled={!municipalities.length}
+                  >
+                    <option value="">Select Municipality</option>
+                    {municipalities.map((mun) => (
+                      <option key={mun} value={mun}>
+                        {mun}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.municipality && (
+                    <p className="text-red-500 text-sm">
+                      {errors.municipality}
+                    </p>
                   )}
                 </div>
+
+                {/* Ward */}
+                <div>
+                  <label className="text-sm font-medium">Ward No *</label>
+                  <select
+                    name="wardNo"
+                    value={form.wardNo}
+                    onChange={handleInput}
+                    className="w-full p-3 rounded-md border bg-[#FFFDF9]"
+                    disabled={!wards.length}
+                  >
+                    <option value="">Select Ward</option>
+                    {wards.map((w) => (
+                      <option key={w} value={w}>
+                        {w}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.wardNo && (
+                    <p className="text-red-500 text-sm">{errors.wardNo}</p>
+                  )}
+                </div>
+
               </div>
             </div>
           )}
@@ -411,7 +542,7 @@ const ProviderRegistration = () => {
               </h2>
 
               <div className="grid md:grid-cols-2 gap-4">
-
+                {/* idType, idFile, cvFile, portfolio, extraCert */}
                 <div>
                   <label className="text-sm font-medium">ID Type *</label>
                   <select
@@ -432,6 +563,9 @@ const ProviderRegistration = () => {
 
                 <div>
                   <label className="text-sm font-medium">Upload ID *</label>
+                  <p className="text-xs text-gray-600 -mt-1 mb-1">
+                    Max size: 5 MB
+                  </p>
                   <input
                     type="file"
                     name="idFile"
@@ -446,10 +580,13 @@ const ProviderRegistration = () => {
 
                 <div>
                   <label className="text-sm font-medium">Upload CV *</label>
+                  <p className="text-xs text-gray-600 -mt-1 mb-1">
+                    Max: 5 MB         ( Must be in pdf format )
+                  </p>
                   <input
                     type="file"
                     name="cvFile"
-                    accept=".pdf,.jpg,.png"
+                    accept=".pdf"
                     onChange={handleFile}
                     className="w-full p-2 rounded-md border bg-[#FFFDF9]"
                   />
@@ -460,12 +597,15 @@ const ProviderRegistration = () => {
 
                 <div>
                   <label className="text-sm font-medium">
-                    Portfolio (optional)
+                    Portfolio 
                   </label>
+                  <p className="text-xs text-gray-600 -mt-1 mb-1">
+                    Max: 5 MB        ( Must be in pdf/jpg/png format )
+                  </p>
                   <input
                     type="file"
                     name="portfolio"
-                    accept="image/*"
+                    accept=".pdf,.jpg,.png"
                     multiple
                     onChange={handleFile}
                     className="w-full p-2 rounded-md border bg-[#FFFDF9]"
@@ -473,27 +613,52 @@ const ProviderRegistration = () => {
                   <p className="text-xs text-gray-600 mt-1">
                     {form.portfolio.length} selected
                   </p>
+                  {errors.portfolio && (
+                    <p className="text-red-500 text-sm">{errors.portfolio}</p>
+                  )}
                 </div>
 
-                <div>
-                  <label className="text-sm font-medium">Extra Certificate</label>
-                  <input
-                    type="file"
-                    name="extraCert"
-                    accept=".pdf,.jpg,.png"
-                    onChange={handleFile}
-                    className="w-full p-2 rounded-md border bg-[#FFFDF9]"
-                  />
-                  <p className="text-xs text-gray-600 mt-1">
-                    {fileName(form.extraCert)}
+   <div className="mt-6">
+            <label className="text-sm font-medium block mb-2">
+              Extra Certificates 
+            </label>
+            <p className="text-xs text-gray-600 -mt-1 mb-1">
+                    Max:5 MB each    ( Must be in pdf/jpg/png format )
                   </p>
-                </div>
+
+            {form.extraCert.map((c, i) => (
+              <div key={i} className="flex gap-2 mb-2">
+              
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.png"
+                  onChange={(e) =>
+                    handleExtraCertChange(i, e.target.files[0])
+                  }
+                  className="flex-1 p-2 border rounded-md"
+                />
+                {i === form.extraCert.length - 1 && (
+                  <button
+                    type="button"
+                    onClick={addExtraCert}
+                    className="w-10 h-10 bg-emerald-500 text-white rounded-full"
+                  >
+                    +
+                  </button>
+                )}
+              </div>
+            ))}
+
+            {errors.extraCert && (
+              <p className="text-red-500 text-sm">{errors.extraCert}</p>
+            )}
+          </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Navigation buttons */}
+        {/* Navigation */}
         <div className="flex justify-between mt-8">
           {step > 1 ? (
             <button
@@ -507,13 +672,13 @@ const ProviderRegistration = () => {
             <div></div>
           )}
 
-          {step < 5 ? (
+          {step < 4 ? (
             <button
               type="button"
               onClick={next}
               className="px-5 py-2 rounded-md bg-[#C6A77B] text-white font-semibold hover:opacity-90"
             >
-              Submit
+              Next
             </button>
           ) : (
             <button

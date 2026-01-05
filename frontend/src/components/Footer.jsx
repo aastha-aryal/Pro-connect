@@ -21,7 +21,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="relative bg-linear-to-br from-[#192b3c] via-[#273754] to-[#415A77] text-[#E0E1DD] overflow-hidden">
+    <footer className="relative bg-linear-to-br from-[#4e7090] to-[#85a8d1] text-[#fefffc] overflow-hidden">
       {/* Soft Radial Glow */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,245,255,0.05),transparent_70%)] backdrop-blur-sm"></div>
 
@@ -43,7 +43,7 @@ const Footer = () => {
           </p>
           <ul className="space-y-1 text-sm">
             <li className="flex items-center gap-2">
-              <FaPhone className="text-[#00F5FF]" />
+              <FaPhone className="text-[#00F5FF] rotate-90" />
               <a href="tel:+97798XXXXXXXX" className="hover:text-[#00F5FF] transition-colors duration-200">
                 +977 98XXXXXXXX
               </a>

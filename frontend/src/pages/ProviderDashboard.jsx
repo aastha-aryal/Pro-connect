@@ -1,12 +1,18 @@
-// Updated ProviderDashboard based on your new final flow (Incoming → Accepted → Confirmed)
-// Frontend only, no backend yet.
-
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { FaEdit, FaCamera, FaCheckCircle, FaClock, FaInbox } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import {
+  FaEdit,
+  FaInbox,
+  FaClock,
+  FaCheckCircle,
+  FaStar,
+  FaMapMarkerAlt,
+  FaPhone,
+  FaSignOutAlt
+} from "react-icons/fa";
 
 const ProviderDashboard = () => {
-  const [isEditing, setIsEditing] = useState(false);
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("incoming");
 
   const [profile, setProfile] = useState({
@@ -14,181 +20,236 @@ const ProviderDashboard = () => {
     phone: "+977-9841234567",
     profession: "Plumber",
     experience: "8 years",
-    location: "Kathmandu, Nepal",
+    location: { province: "Bagmati", district: "Kathmandu", municipality: "Kathmandu Metropolitan", ward: "12" },
+    bio: "Experienced plumber with a focus on quality and punctuality.",
+    skills: "Pipe fitting, leak repair, bathroom installation",
     photo: "https://i.pravatar.cc/150?img=12",
+    reviews: 4.8,
+    totalReviews: 25,
   });
 
-  // Sample dummy data for frontend UI only
+  const [editPhone, setEditPhone] = useState(false);
+  const [editBio, setEditBio] = useState(false);
+  const [editSkills, setEditSkills] = useState(false);
+
+  // Dummy data for requests/jobs
   const incomingRequests = [
-    { id: 1, customer: "Alice Rai", location: "Baneshwor" },
-    { id: 2, customer: "Suman Thapa", location: "Kupandole" },
+    { id: 1, name: "Ram Shrestha", location: { district: "Kathmandu", municipality: "Baneshwor", ward: "6" }, distance: "2.5 km", phone: "9812345678", mapLink: "https://maps.google.com" },
+    { id: 2, name: "Sita Rai", location: { district: "Lalitpur", municipality: "Lalitpur Metropolitan", ward: "3" }, distance: "3.2 km", phone: "9812345679", mapLink: "https://maps.google.com" },
   ];
 
   const acceptedRequests = [
-    { id: 3, customer: "Mina Shrestha", location: "Patan", status: "Waiting for customer confirmation" },
+    { id: 3, name: "Hari Thapa", location: { district: "Kathmandu", municipality: "Kapan", ward: "8" }, distance: "1.8 km", phone: "9812345680", mapLink: "https://maps.google.com" },
   ];
 
-  const confirmedBookings = [
-    { id: 4, customer: "Arjun KC", phone: "9812345678", location: "Balaju", status: "confirmed" },
+  const completedJobs = [
+    { id: 4, name: "Sam KC", rated: true, stars: 4.5 },
+    { id: 5, name: "Laxmi Sharma", rated: false, stars: 0 },
   ];
 
-  const handleSave = () => {
-    setIsEditing(false);
+  // ✅ Updated logout function
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    navigate("/home"); // redirect to home
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <div className="w-72 bg-white p-6 shadow-lg border-r">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Profile</h2>
+    <div className="min-h-screen flex flex-col lg:flex-row bg-[#f9f6f1]">
+      {/* Sidebar/Profile */}
+      <div className="lg:w-80 bg-white p-4 sm:p-6 shadow-lg border-r flex flex-col">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Profile</h2>
 
         <div className="text-center mb-4">
-          <div className="relative inline-block">
-            <img
-              src={profile.photo}
-              alt="profile"
-              className="w-28 h-28 rounded-full object-cover border-4 border-blue-200 mx-auto"
-            />
-            {isEditing && (
-              <button className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full shadow">
-                <FaCamera />
-              </button>
+          <img src={profile.photo} alt="profile" className="w-28 h-28 rounded-full object-cover border-4 border-blue-200 mx-auto" />
+        </div>
+
+        <div className="space-y-3 text-gray-700">
+          <p className="font-bold text-lg text-center">{profile.name}</p>
+          <p className="text-left">{profile.profession}</p>
+          <p className="text-left">⏳ {profile.experience}</p>
+
+          {/* Reviews */}
+          <div className="flex items-center gap-1 mt-1">
+            <FaStar className="text-yellow-400" />
+            <span>{profile.reviews} ({profile.totalReviews} reviews)</span>
+          </div>
+
+          {/* Location */}
+          <p className="mt-1 text-gray-600 text-sm text-left">
+            📍 {profile.location.district}, {profile.location.municipality}, Ward {profile.location.ward}
+          </p>
+
+          {/* Phone Section */}
+          <div className="border p-3 rounded-lg mt-2">
+            <p className="font-semibold">Phone:</p>
+            {editPhone ? (
+              <div className="flex gap-2">
+                <input
+                  value={profile.phone}
+                  onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                  className="w-full p-1 border rounded"
+                />
+                <button
+                  onClick={() => setEditPhone(false)}
+                  className="bg-blue-500 text-white px-2 rounded"
+                >
+                  Save
+                </button>
+              </div>
+            ) : (
+              <div className="flex justify-between items-center">
+                <span>{profile.phone}</span>
+                <button onClick={() => setEditPhone(true)} className="text-blue-500 text-sm ml-1 flex items-center gap-1"><FaEdit /> Edit</button>
+              </div>
+            )}
+          </div>
+
+          {/* Skills Section */}
+          <div className="border p-3 rounded-lg mt-2">
+            <p className="font-semibold">Skills:</p>
+            {editSkills ? (
+              <div>
+                <textarea
+                  value={profile.skills}
+                  onChange={(e) => setProfile({ ...profile, skills: e.target.value })}
+                  className="w-full p-1 border rounded"
+                />
+                <button
+                  onClick={() => setEditSkills(false)}
+                  className="bg-blue-500 text-white px-2 rounded mt-1"
+                >
+                  Save
+                </button>
+              </div>
+            ) : (
+              <div className="flex justify-between items-center">
+                <span>{profile.skills}</span>
+                <button onClick={() => setEditSkills(true)} className="text-blue-500 text-sm ml-1 flex items-center gap-1"><FaEdit /> Edit</button>
+              </div>
+            )}
+          </div>
+
+          {/* Bio Section */}
+          <div className="border p-3 rounded-lg mt-2">
+            <p className="font-semibold">Bio:</p>
+            {editBio ? (
+              <div>
+                <textarea
+                  value={profile.bio}
+                  onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                  className="w-full p-1 border rounded"
+                />
+                <button
+                  onClick={() => setEditBio(false)}
+                  className="bg-blue-500 text-white px-2 rounded mt-1"
+                >
+                  Save
+                </button>
+              </div>
+            ) : (
+              <div className="flex justify-between items-center">
+                <span>{profile.bio}</span>
+                <button onClick={() => setEditBio(true)} className="text-blue-500 text-sm ml-1 flex items-center gap-1"><FaEdit /> Edit</button>
+              </div>
             )}
           </div>
         </div>
 
-        {isEditing ? (
-          <div className="space-y-3">
-            <input
-              value={profile.name}
-              onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-              className="w-full p-2 border rounded"
-              placeholder="Name"
-            />
-            <input
-              value={profile.phone}
-              onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-              className="w-full p-2 border rounded"
-              placeholder="Phone"
-            />
-            <input
-              value={profile.profession}
-              onChange={(e) => setProfile({ ...profile, profession: e.target.value })}
-              className="w-full p-2 border rounded"
-              placeholder="Profession"
-            />
-            <input
-              value={profile.experience}
-              onChange={(e) => setProfile({ ...profile, experience: e.target.value })}
-              className="w-full p-2 border rounded"
-              placeholder="Experience"
-            />
-            <input
-              value={profile.location}
-              onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-              className="w-full p-2 border rounded"
-              placeholder="Location"
-            />
-            <button onClick={handleSave} className="w-full bg-blue-500 text-white py-2 rounded-lg mt-2">
-              Save Changes
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-1 text-gray-700">
-            <p className="font-bold text-lg">{profile.name}</p>
-            <p>{profile.profession}</p>
-            <p>📱 {profile.phone}</p>
-            <p>📍 {profile.location}</p>
-            <p>⏳ {profile.experience}</p>
-          </div>
-        )}
-
-        <button
-          onClick={() => setIsEditing(!isEditing)}
-          className="mt-4 w-full flex justify-center items-center gap-2 bg-blue-100 text-blue-700 py-2 rounded-lg"
-        >
-          <FaEdit /> Edit Profile
-        </button>
-
-        {/* Sidebar Navigation */}
-        <div className="mt-10 space-y-3">
+        {/* Sidebar Tabs */}
+        <div className="mt-6 space-y-3">
           <button
             onClick={() => setActiveTab("incoming")}
-            className={`w-full text-left px-4 py-2 rounded-lg ${
-              activeTab === "incoming" ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}
+            className={`w-full text-left px-4 py-2 rounded-lg ${activeTab === "incoming" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
           >
             Incoming Requests
           </button>
           <button
             onClick={() => setActiveTab("accepted")}
-            className={`w-full text-left px-4 py-2 rounded-lg ${
-              activeTab === "accepted" ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}
+            className={`w-full text-left px-4 py-2 rounded-lg ${activeTab === "accepted" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
           >
             Accepted Requests
           </button>
           <button
-            onClick={() => setActiveTab("confirmed")}
-            className={`w-full text-left px-4 py-2 rounded-lg ${
-              activeTab === "confirmed" ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}
+            onClick={() => setActiveTab("completed")}
+            className={`w-full text-left px-4 py-2 rounded-lg ${activeTab === "completed" ? "bg-blue-500 text-white" : "bg-gray-200"}`}
           >
-            Confirmed Bookings
+            Completed Jobs
           </button>
         </div>
+
+        {/* ✅ LOGOUT BUTTON */}
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 text-red-500 hover:bg-red-50 px-3 py-2 rounded-lg mt-4"
+        >
+          <FaSignOutAlt size={18} /> Logout
+        </button>
       </div>
 
-      {/* MAIN CONTENT */}
-      <div className="flex-1 p-8">
+      {/* Main Content */}
+      <div className="flex-1 p-8 space-y-6">
+        {/* Incoming */}
         {activeTab === "incoming" && (
           <div className="bg-white p-6 rounded-xl shadow-lg">
-            <h2 className="text-2xl font-bold flex items-center gap-2 mb-4">
-              <FaInbox /> Incoming Requests
-            </h2>
+            <h2 className="text-2xl font-bold text-center mb-4"><FaInbox className="inline mr-2" /> Incoming Requests</h2>
             {incomingRequests.map((req) => (
-              <div key={req.id} className="border p-4 rounded-lg mb-3 flex justify-between">
-                <div>
-                  <p className="font-semibold">{req.customer}</p>
-                  <p className="text-gray-500">📍 {req.location}</p>
+              <div key={req.id} className="border p-4 rounded-lg mb-3 flex justify-between items-center">
+                <div className="flex flex-col">
+                  <p className="font-semibold">{req.name}</p>
+                  <p className="text-gray-500 text-sm"> {req.location.district}, {req.location.municipality}, Ward {req.location.ward}</p>
+                  <p className="text-gray-500 text-sm">📍Distance: {req.distance}</p>
+                  <p className="text-blue-500 text-sm">📞 {req.phone}</p>
                 </div>
-                <div className="flex gap-2">
-                  <button className="bg-green-500 text-white px-4 py-1 rounded">Accept</button>
-                  <button className="bg-red-500 text-white px-4 py-1 rounded">Decline</button>
+                <div className="flex flex-col items-end gap-2">
+                  <a href={`tel:${req.phone}`} className="text-blue-500 flex items-center gap-1 text-sm"> <FaPhone className="rotate-90" /> Call</a>
+                  <div className="flex gap-2">
+                    <button className="bg-green-500 text-white px-4 py-1 rounded">Accept</button>
+                    <button className="bg-red-500 text-white px-4 py-1 rounded">Deny</button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         )}
 
+        {/* Accepted */}
         {activeTab === "accepted" && (
           <div className="bg-white p-6 rounded-xl shadow-lg">
-            <h2 className="text-2xl font-bold flex items-center gap-2 mb-4">
-              <FaClock /> Accepted Requests
-            </h2>
+            <h2 className="text-2xl font-bold text-center mb-4"><FaClock className="inline mr-2" /> Accepted Requests</h2>
             {acceptedRequests.map((req) => (
-              <div key={req.id} className="border p-4 rounded-lg mb-3">
-                <p className="font-semibold">{req.customer}</p>
-                <p className="text-gray-500">📍 {req.location}</p>
-                <p className="text-blue-600 text-sm mt-1">{req.status}</p>
+              <div key={req.id} className="border p-4 rounded-lg mb-3 flex justify-between items-center">
+                <div className="flex flex-col">
+                  <p className="font-semibold">{req.name}</p>
+                  <p className="text-gray-500 text-sm"> {req.location.district}, {req.location.municipality}, Ward {req.location.ward}</p>
+                  <p className="text-gray-500 text-sm">📍Distance: {req.distance}</p>
+                  <p className="text-blue-500 text-sm">📞 {req.phone}</p>
+                </div>
+                <div className="flex flex-col items-end gap-2">
+                  <a href={`tel:${req.phone}`} className="text-blue-500 flex items-center gap-1 text-sm"> <FaPhone className="rotate-90" /> Call</a>
+                  <a href={req.mapLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 flex items-center gap-1 text-sm"><FaMapMarkerAlt /> Map</a>
+                  <button className="bg-blue-500 text-white px-4 py-1 rounded">Complete</button>
+                </div>
               </div>
             ))}
           </div>
         )}
 
-        {activeTab === "confirmed" && (
+        {/* Completed */}
+        {activeTab === "completed" && (
           <div className="bg-white p-6 rounded-xl shadow-lg">
-            <h2 className="text-2xl font-bold flex items-center gap-2 mb-4">
-              <FaCheckCircle className="text-green-600" /> Confirmed Bookings
-            </h2>
-            {confirmedBookings.map((req) => (
-              <div key={req.id} className="border p-4 rounded-lg mb-3">
-                <p className="font-semibold">{req.customer}</p>
-                <p className="text-gray-500">📱 {req.phone}</p>
-                <p className="text-gray-500">📍 {req.location}</p>
-                <span className="inline-block mt-2 px-3 py-1 bg-green-200 text-green-700 rounded text-sm">
-                  {req.status}
-                </span>
+            <h2 className="text-2xl font-bold text-center mb-4"><FaCheckCircle className="text-green-600 inline mr-2" /> Completed Jobs</h2>
+            {completedJobs.map((req) => (
+              <div key={req.id} className="border p-4 rounded-lg mb-3 flex justify-between items-center">
+                <div className="flex flex-col">
+                  <p className="font-semibold">{req.name}</p>
+                  <div className="flex items-center mt-2">
+                    {[...Array(5)].map((_, i) => (
+                      <FaStar key={i} className={`mr-1 ${i < Math.floor(req.stars) ? "text-yellow-400" : "text-gray-300"}`} />
+                    ))}
+                    {!req.rated && <span className="ml-2 text-gray-500 text-sm">Not rated</span>}
+                  </div>
+                </div>
               </div>
             ))}
           </div>

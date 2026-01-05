@@ -15,6 +15,7 @@ import CustomerRegistration from "./pages/CustomerRegistration";
 import ProviderRegistration from "./pages/ProviderRegistration";
 import CustomerDashboard from "./pages/CustomerDashboard";
 import ProviderDashboard from "./pages/ProviderDashboard";
+import ReviewPage from "./pages/Review";
 import ServiceRequestPage from "./pages/ServiceRequestPage";
 import VerificationPage from "./pages/VerificationPage";
 
@@ -41,6 +42,7 @@ function App() {
             <Route path="/register-provider" element={<ProviderRegistration />} />
             <Route path="/customer-dashboard" element={<CustomerDashboard />} />
             <Route path="/provider-dashboard" element={<ProviderDashboard />} />
+            <Route path="/review/:id" element={<ReviewPage />} />
             <Route path="/service-request/:service" element={<ServiceRequestPage />} />
             <Route path="/verification" element={<VerificationPage />} />
           </Routes>

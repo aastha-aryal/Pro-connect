@@ -1,15 +1,21 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { HiMenu, HiX } from "react-icons/hi";
-import Logo from "../assets/logo.svg";
+import Logo from "../assets/logo.png"; // ✅ changed to PNG
+
+import React, { useState, useEffect } from "react";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [getStartedOpen, setGetStartedOpen] = useState(false);
-
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
-  const isLoggedIn = !!token;
+  const location = useLocation(); // 🔑 for route change detection
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Update login state on route changes
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, [location.pathname]);
 
   const navLinks = [
     { name: "About Us", path: "/about" },
@@ -17,20 +23,31 @@ const Header = () => {
     { name: "FAQs", path: "/faq" },
   ];
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    setIsLoggedIn(false); // immediately update header
+    navigate("/home"); // go to home after logout
+  };
+
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md shadow-md animate-fadeInDown">
       <div className="max-w-7xl mx-auto flex justify-between items-center py-2.5 px-5 md:px-10">
         {/* Logo + Title */}
         <div className="relative flex items-center gap-2.5">
           <div className="absolute w-10 h-10 md:w-12 md:h-12 bg-[#FF6EC7] rounded-full opacity-20 blur-xl animate-glow-soft"></div>
-          <img src={Logo} alt="Pro-Connect Logo" className="w-10 h-10 md:w-12 md:h-12 relative z-10 rounded-full shadow-md" />
-          <Link
-          to="/home"
-          className="text-2xl md:text-3xl font-extrabold bg-linear-to-r from-[#ffffff] via-[#2c6995] to-[#ddb7c3] bg-clip-text text-transparent animate-gradient-x"
-          >
-          Pro-Connect
-          </Link>
+          <img
+            src={Logo} 
+            alt="Pro-Connect Logo"
+            className="w-10 h-10 md:w-12 md:h-12 relative z-10 rounded-full shadow-md"
+          />
 
+          <Link
+            to="/home"
+            className="text-2xl md:text-3xl font-extrabold bg-linear-to-r from-[#ffffff] via-[#2c6995] to-[#ddb7c3] bg-clip-text text-transparent animate-gradient-x"
+          >
+            Pro-Connect
+          </Link>
         </div>
 
         {/* Desktop Nav */}
@@ -46,52 +63,30 @@ const Header = () => {
             </Link>
           ))}
 
-          {/* Get Started Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setGetStartedOpen(!getStartedOpen)}
-              className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-500 transition"
-            >
-              Get Started
-            </button>
-            {getStartedOpen && (
-              <div className="absolute right-0 mt-2 w-44 bg-white border shadow-lg rounded-lg z-50">
-                <button
-                  onClick={() => navigate("/register-customer")}
-                  className="w-full py-2 px-4 hover:bg-gray-100 text-gray-800 text-left"
-                >
-                  Customer
-                </button>
-                <button
-                  onClick={() => navigate("/register-provider")}
-                  className="w-full py-2 px-4 hover:bg-gray-100 text-gray-800 text-left"
-                >
-                  Service Provider
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Login Button */}
-          {!isLoggedIn && (
+          {/* Login or Logout button */}
+          {!isLoggedIn ? (
             <button
               onClick={() => navigate("/login")}
               className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 transition"
             >
               Login
             </button>
+          ) : (
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 transition"
+            >
+              Logout
+            </button>
           )}
         </nav>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile Menu */}
         <div className="md:hidden flex items-center gap-3">
           <button
-            onClick={() => setGetStartedOpen(!getStartedOpen)}
-            className="px-3 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-500 transition"
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="text-3xl text-gray-800 focus:outline-none"
           >
-            Get Started
-          </button>
-          <button onClick={() => setMenuOpen(!menuOpen)} className="text-3xl text-gray-800 focus:outline-none">
             {menuOpen ? <HiX /> : <HiMenu />}
           </button>
         </div>
@@ -114,12 +109,26 @@ const Header = () => {
               {link.name}
             </Link>
           ))}
-          {!isLoggedIn && (
+
+          {!isLoggedIn ? (
             <button
-              onClick={() => navigate("/login")}
+              onClick={() => {
+                navigate("/login");
+                setMenuOpen(false);
+              }}
               className="py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-100 transition"
             >
               Login
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                handleLogout();
+                setMenuOpen(false);
+              }}
+              className="py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-100 transition"
+            >
+              Logout
             </button>
           )}
         </nav>

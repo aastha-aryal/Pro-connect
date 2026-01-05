@@ -4,6 +4,6 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/Pro-connecttt/', //  this line is for GitHub Pages
+  base: '/Pro-connect/', //  this line is for GitHub Pages
   plugins: [react(), tailwindcss()],
 })
