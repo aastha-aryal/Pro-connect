@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://aastha-aryal.github.io/Pro-connectt",
+  "homepage": "https://aastha-aryal.github.io/Pro-connect",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
