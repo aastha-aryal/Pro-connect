@@ -90,7 +90,6 @@ export default function CustomerDashboard() {
       address: "New Baneshwor, Kathmandu",
       online: true,
       skills: ["Pipe Fitting", "Leak Repair", "Drain Cleaning", "Water Heater"],
-
     },
     {
       id: 2,
@@ -132,7 +131,7 @@ export default function CustomerDashboard() {
       review: "Great teaching methodology. My child's grades improved significantly."
     },
   ];
-
+  
   const toggleExpand = (id) => {
     setExpandedIds((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
@@ -142,6 +141,7 @@ export default function CustomerDashboard() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
+    // Navigate to home/login - adjust to your routing if different
     navigate("/home");
   };
 
@@ -367,7 +367,7 @@ export default function CustomerDashboard() {
           </motion.div>
         )}
 
-        {/* MY REQUESTS - REMOVED PRICING SECTION */}
+        {/* MY REQUESTS */}
         {activeTab === "requests" && (
           <div>
             <div className="mb-8">
@@ -555,7 +555,7 @@ export default function CustomerDashboard() {
           </div>
         )}
 
-        {/* SERVICES TAKEN - ENHANCED WITH MORE DETAILS */}
+        {/* SERVICES TAKEN */}
         {activeTab === "servicesTaken" && (
           <div className="max-w-5xl mx-auto">
             <div className="bg-gray-900 text-white p-8 rounded-xl shadow-lg mb-8">
@@ -584,9 +584,11 @@ export default function CustomerDashboard() {
           <div>
             <div className="mb-8">
               <h3 className="text-2xl font-bold text-gray-900">Browse Services</h3>
-              <p className="text-gray-600 mt-2">Discover and book professional services in your area</p>
+              <p className="text-gray-600 mt-2">
+                Discover and book professional services in your area
+              </p>
             </div>
-            
+
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
               {SERVICES.map((service) => (
                 <motion.div
@@ -594,11 +596,15 @@ export default function CustomerDashboard() {
                   whileHover={{ scale: 1.03, y: -3 }}
                   whileTap={{ scale: 0.98 }}
                   className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden cursor-pointer group hover:shadow-lg transition-all duration-300"
-                  onClick={() =>
-                    navigate(`/service-request/${service.title.toLowerCase()}`, {
+                  onClick={() => {
+                    // Create a URL-friendly slug (e.g. "Home Tutors" -> "home-tutors")
+                    const slug = service.title.toLowerCase().replace(/\s+/g, "-");
+                    // Navigate to the route param (/:category) and also pass the readable title in state
+                    navigate(`/service-request/${encodeURIComponent(slug)}`, {
                       state: { category: service.title },
-                    })
-                  }
+                      replace: false,
+                    });
+                  }}
                 >
                   <div className="relative h-36 overflow-hidden">
                     <img

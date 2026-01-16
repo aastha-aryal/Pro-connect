@@ -4,18 +4,19 @@ import { FaPhone, FaStar, FaMapMarkerAlt, FaBriefcase, FaChevronDown, FaChevronU
 import { motion } from "framer-motion";
 
 export default function ServiceRequestPage() {
+  // expect route like /service-request/:category
+  const { category: paramCategory } = useParams();        
   const location = useLocation();
-  const params = useParams();
   const navigate = useNavigate();
 
-  const category = location.state?.category || params.category;
+  // Prefer location.state.category, then route param
+  const category = location.state?.category || paramCategory || "";
 
   const [providers, setProviders] = useState([]);
   const [expandedIds, setExpandedIds] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Mock data with Nepali market pricing for different skills
+  useEffect(() => {  
     const mockProviders = [
       {
         id: 1,
@@ -37,8 +38,8 @@ export default function ServiceRequestPage() {
           { name: "Tap Installation", price: "Rs 350" }
         ],
         online: true,
-        responseTime: "15 mins",
-        verified: true
+        verified: true,
+        responseTime: "30 min"
       },
       {
         id: 2,
@@ -58,8 +59,8 @@ export default function ServiceRequestPage() {
           { name: "Water Tank Setup", price: "" }
         ],
         online: false,
-        responseTime: "1 hour",
-        verified: true
+        verified: false,
+        responseTime: "1 hr"
       },
       {
         id: 3,
@@ -79,13 +80,16 @@ export default function ServiceRequestPage() {
           { name: "Complete Plumbing", price: "Rs 5000+" }
         ],
         online: true,
-        responseTime: "10 mins",
-        verified: true
+        verified: false,
+        responseTime: "45 min"
       }
     ];
 
-    // Filter based on category (for demo, all are plumbers)
-    const filtered = category?.toLowerCase() === "plumber" ? mockProviders : [];
+    // filter by category (example: 'plumber')
+    const filtered = category?.toLowerCase() === "plumber"
+      ? mockProviders
+      : [];
+
     filtered.sort((a, b) => b.rating - a.rating);
     
     setProviders(filtered);
@@ -115,7 +119,7 @@ export default function ServiceRequestPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white p-4 md:p-6">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-white p-4 md:p-6">
       {/* Header */}
       <div className="max-w-6xl mx-auto mb-6">
         <div className="mb-6">
@@ -331,7 +335,7 @@ export default function ServiceRequestPage() {
                           <div>
                             <h3 className="text-xl font-bold text-gray-900 mb-6">Performance Stats</h3>
                             <div className="space-y-4">
-                              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5">
+                              <div className="bg-linear-to-r from-blue-50 to-indigo-50 rounded-xl p-5">
                                 <div className="text-3xl font-bold text-gray-900 mb-2">{provider.totalServices}</div>
                                 <div className="text-gray-700 font-semibold">Total Services Completed</div>
                                 <div className="text-sm text-gray-500 mt-1">Across all clients</div>
@@ -368,26 +372,6 @@ export default function ServiceRequestPage() {
             })}
           </div>
         )}
-      </div>
-
-      {/* Footer Note */}
-      <div className="max-w-6xl mx-auto mt-10">
-        <div className="bg-gradient-to-r from-gray-900 to-black rounded-2xl p-8 text-white">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
-              <h4 className="text-2xl font-bold mb-3">Need Help Choosing?</h4>
-              <p className="text-gray-300">
-                Compare multiple providers, check their ratings and experience, then make an informed decision.
-              </p>
-            </div>
-            <button
-              onClick={() => navigate('/customer-dashboard', { state: { activeTab: 'services' } })}
-              className="px-8 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-100 transition-colors shadow-lg"
-            >
-              ← Back to Services
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );

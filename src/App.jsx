@@ -1,6 +1,5 @@
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
-
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Loader from "./components/Loader";
@@ -22,17 +21,13 @@ import VerificationPage from "./pages/VerificationPage";
 
 function AppWrapper() {
   const [showLoader, setShowLoader] = useState(true);
-
   useEffect(() => {
     const loaderShown = sessionStorage.getItem("loaderShown");
-
     if (!loaderShown) {
       sessionStorage.setItem("loaderShown", "true");
-
       const timer = setTimeout(() => {
         setShowLoader(false);
       }, 3000);
-
       return () => clearTimeout(timer);
     } else {
       setShowLoader(false);
@@ -55,7 +50,7 @@ function AppWrapper() {
       <Route path="/review/:id" element={<ReviewPage />} />
       <Route path="/service-request/:service" element={<ServiceRequestPage />} />
       <Route path="/verification" element={<VerificationPage />} />
-
+     
       {/* Customer Protected */}
       <Route element={<ProtectedRoute allowedRole="customer" />}>
         <Route path="/customer-dashboard" element={<CustomerDashboard />} />
@@ -85,5 +80,4 @@ function App() {
     </Router>
   );
 }
-
 export default App;
