@@ -30,23 +30,21 @@ const Loader = () => {
   }, [navigate]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-900 animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-linear-to-br from-gray-900 via-black to-gray-900 animate-fadeIn">
       
       {/* Outer Yellow Circling Animation */}
       <div className="absolute w-96 h-96 border-4 border-transparent rounded-full">
         <div className="absolute inset-0 border-t-4 border-yellow-500 rounded-full animate-spin-slow"></div>
-        <div className="absolute inset-4 border-b-4 border-yellow-400 rounded-full animate-spin-reverse"></div>
       </div>
 
       {/* Middle Yellow Circling Animation */}
       <div className="absolute w-80 h-80">
         <div className="absolute inset-0 border-2 border-yellow-300 rounded-full animate-pulse"></div>
-        <div className="absolute inset-8 border-2 border-yellow-200 rounded-full animate-ping-slow"></div>
       </div>
 
       {/* Logo Container */}
       <div className="relative z-10 flex flex-col items-center justify-center">
-        <div className="p-8 rounded-full bg-gradient-to-br from-gray-800 to-black shadow-2xl mb-8 animate-pulse-slow">
+        <div className="p-8 rounded-full bg-linear-to-br from-gray-800 to-black shadow-2xl mb-8 animate-pulse-slow">
           <img
             src={Logo}
             alt="Pro-Connect Logo"
@@ -79,7 +77,7 @@ const Loader = () => {
 
         {/* Loading Text */}
         <div className="text-center">
-          <p className="text-3xl font-bold bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-200 bg-clip-text text-transparent animate-glow mb-2">
+          <p className="text-3xl font-bold bg-linear-to-r from-yellow-400 via-yellow-300 to-yellow-200 bg-clip-text text-transparent animate-glow mb-2">
             Pro-Connect
           </p>
           <p className="text-gray-300 text-lg font-semibold animate-pulse tracking-wider">

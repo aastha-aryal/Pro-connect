@@ -15,12 +15,9 @@ import {
   Star,
   Briefcase,
   Plus,
-  X,
-  Clock,
-  Calendar,
-  MessageCircle
+  X
 } from "lucide-react";
-import { FaPhone, FaMapMarkerAlt } from "react-icons/fa";
+import { FaPhone } from "react-icons/fa";
 
 export default function ProviderDashboard() {
   const navigate = useNavigate();
@@ -43,6 +40,7 @@ export default function ProviderDashboard() {
     street: "New Baneshwor",
     latitude: "27.7172",
     longitude: "85.3240",
+    serviceCategory: "Plumber",
     experience: "5 Years",
     rating: 4.5,
   };
@@ -94,18 +92,14 @@ export default function ProviderDashboard() {
       customerName: "John Doe",
       service: "Kitchen Pipe Replacement",
       rating: 5,
-      review: "Excellent work! Very professional and completed on time.",
-      date: "2024-01-15",
-      earnings: "$150"
+      review: "Excellent work! Very professional and completed on time."
     },
     {
       id: 2,
       customerName: "Jane Smith",
       service: "Bathroom Leak Repair",
       rating: 4,
-      review: "Good service, but arrived 30 minutes late.",
-      date: "2024-01-10",
-      earnings: "$85"
+      review: "Good service, but arrived 30 minutes late."
     }
   ];
 
@@ -148,57 +142,57 @@ export default function ProviderDashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gradient-to-br from-gray-50 to-blue-50 text-gray-800">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50 text-gray-800">
       {/* PREMIUM SIDEBAR */}
-      <div className="lg:w-80 bg-white p-6 shadow-xl border-r border-gray-200 flex flex-col">
+      <div className="lg:w-80 bg-white p-6 shadow-lg border-r border-gray-200 flex flex-col">
         <div className="text-center mb-8">
           <div className="relative w-32 h-32 mx-auto mb-4">
-            <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-700 to-indigo-900 flex items-center justify-center text-white text-4xl font-bold shadow-2xl">
+            <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
               RS
             </div>
-            <div className="absolute -bottom-2 right-2 w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-full flex items-center justify-center shadow-lg border-4 border-white">
+            <div className="absolute -bottom-2 right-2 w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center shadow-md border-4 border-white">
               <Briefcase size={18} className="text-white" />
             </div>
           </div>
           <h2 className="text-2xl font-bold text-gray-900">{profile.name}</h2>
           <p className="text-sm text-gray-600 mt-1 flex items-center justify-center gap-1">
             <Briefcase size={14} />
-            Professional Plumber
+            {profile.serviceCategory}
           </p>
           <div className="mt-2 flex items-center justify-center gap-1 text-sm text-gray-600">
-            <Award size={14} className="text-amber-500" />
-            <span className="font-medium">{profile.experience} Experience</span>
+            <Award size={14} />
+            <span>{profile.experience} Experience</span>
           </div>
           <div className="mt-3 flex items-center justify-center gap-1 text-sm text-gray-600">
-            <Star size={14} className="text-amber-500 fill-current" />
-            <span className="font-medium">{profile.rating} Rating</span>
+            <Star size={14} className="text-yellow-500 fill-current" />
+            <span>{profile.rating} Rating</span>
           </div>
         </div>
 
         <nav className="mt-4 space-y-2 flex-1">
           <SidebarItem
-            icon={<User size={20} className="text-blue-600" />}
+            icon={<User size={20} />}
             label="My Profile"
             active={activeTab === "profile"}
             onClick={() => setActiveTab("profile")}
             badge={null}
           />
           <SidebarItem
-            icon={<ClipboardList size={20} className="text-amber-600" />}
+            icon={<ClipboardList size={20} />}
             label="Pending Requests"
             active={activeTab === "pending"}
             onClick={() => setActiveTab("pending")}
             badge={pendingRequests.length}
           />
           <SidebarItem
-            icon={<CheckCircle size={20} className="text-emerald-600" />}
+            icon={<CheckCircle size={20} />}
             label="Accepted Requests"
             active={activeTab === "accepted"}
             onClick={() => setActiveTab("accepted")}
             badge={acceptedRequests.length}
           />
           <SidebarItem
-            icon={<Award size={20} className="text-purple-600" />}
+            icon={<CheckCircle size={20} />}
             label="Completed Jobs"
             active={activeTab === "completed"}
             onClick={() => setActiveTab("completed")}
@@ -208,9 +202,9 @@ export default function ProviderDashboard() {
 
         <button
           onClick={handleLogout}
-          className="mt-8 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow"
+          className="mt-8 flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors duration-200"
         >
-          <LogOut size={18} className="text-gray-600" />
+          <LogOut size={18} />
           <span className="font-medium">Logout</span>
         </button>
       </div>
@@ -219,10 +213,12 @@ export default function ProviderDashboard() {
       <div className="flex-1 p-6 lg:p-8">
         {/* HEADER */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 text-center align-middle">
-            Welcome, <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">{profile.name.split(" ")[0]}!</span>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Welcome, <span className="text-gray-700">{profile.name.split(" ")[0]}!</span>
           </h1>
-          <p className="text-center text-gray-600 mt-2">Manage your service requests and profile</p>
+          <p className="text-gray-600 mt-2">
+            Manage your services and track customer requests
+          </p>
         </div>
 
         {/* PROFILE DETAILS */}
@@ -230,17 +226,17 @@ export default function ProviderDashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl shadow-xl max-w-5xl mx-auto overflow-hidden border border-gray-200"
+            className="bg-white rounded-xl shadow-lg max-w-5xl mx-auto overflow-hidden border border-gray-200"
           >
-            <div className="bg-gradient-to-r from-blue-700 to-indigo-800 p-6 text-white">
+            <div className="bg-gray-900 p-6 text-white">
               <div className="flex justify-between items-center">
                 <div>
                   <h2 className="text-2xl font-bold">Professional Profile</h2>
-                  <p className="text-blue-100 mt-1">Update your professional details</p>
+                  <p className="text-gray-300 mt-1">Update your professional details</p>
                 </div>
                 <button
                   onClick={() => setIsEditing(!isEditing)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white rounded-lg transition-all duration-200 font-medium border border-white/20"
+                  className="flex items-center gap-2 px-4 py-2 bg-white text-gray-900 rounded-lg hover:bg-gray-100 transition-colors font-medium"
                 >
                   {isEditing ? (
                     <>
@@ -283,26 +279,30 @@ export default function ProviderDashboard() {
                       onChange={(e) => setPhone(e.target.value)}
                       type="tel"
                     />
+                    <InfoField
+                      label="Service Category"
+                      value={profile.serviceCategory}
+                      isEditing={isEditing}
+                      type="text"
+                      disabled={true}
+                    />
                   </div>
 
                   {/* Bio Section */}
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      <span className="flex items-center gap-2">
-                        <MessageCircle size={16} className="text-blue-600" />
-                        Professional Bio
-                      </span>
+                      Professional Bio
                     </label>
                     {isEditing ? (
                       <textarea
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
                         rows="4"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors bg-white"
                         placeholder="Describe your professional experience and expertise..."
                       />
                     ) : (
-                      <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+                      <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
                         <p className="text-gray-800 whitespace-pre-line">{bio}</p>
                       </div>
                     )}
@@ -311,10 +311,7 @@ export default function ProviderDashboard() {
                   {/* Skills Section */}
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      <span className="flex items-center gap-2">
-                        <Award size={16} className="text-amber-600" />
-                        Professional Skills
-                      </span>
+                      Professional Skills
                     </label>
                     {isEditing ? (
                       <div>
@@ -324,12 +321,12 @@ export default function ProviderDashboard() {
                             value={newSkill}
                             onChange={(e) => setNewSkill(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && addSkill()}
-                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
                             placeholder="Add a new skill..."
                           />
                           <button
                             onClick={addSkill}
-                            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-sm"
+                            className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
                           >
                             <Plus size={20} />
                           </button>
@@ -338,12 +335,12 @@ export default function ProviderDashboard() {
                           {skills.map((skill, index) => (
                             <span
                               key={index}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-gray-800 rounded-full text-sm font-medium border border-blue-200"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-800 rounded-full text-sm font-medium border border-gray-300"
                             >
                               {skill}
                               <button
                                 onClick={() => removeSkill(skill)}
-                                className="ml-1 text-gray-600 hover:text-red-600 transition-colors"
+                                className="ml-1 text-gray-600 hover:text-gray-800"
                               >
                                 <X size={14} />
                               </button>
@@ -352,12 +349,12 @@ export default function ProviderDashboard() {
                         </div>
                       </div>
                     ) : (
-                      <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+                      <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
                         <div className="flex flex-wrap gap-2">
                           {skills.map((skill, index) => (
                             <span
                               key={index}
-                              className="px-3 py-1.5 bg-white/80 text-gray-800 rounded-full text-sm font-medium border border-blue-200 shadow-sm"
+                              className="px-3 py-1.5 bg-gray-100 text-gray-800 rounded-full text-sm font-medium border border-gray-300"
                             >
                               {skill}
                             </span>
@@ -370,12 +367,12 @@ export default function ProviderDashboard() {
                   {/* Location Section */}
                   <div className="border-t border-gray-200 pt-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                      <Navigation size={18} className="text-blue-600" />
+                      <Navigation size={18} />
                       Service Location
                     </h3>
                     
                     <div className="space-y-4">
-                      <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+                      <div>
                         <p className="text-sm text-gray-600 mb-1">Service Area</p>
                         <p className="text-gray-800 font-medium">
                           {profile.street}, {profile.district}, {profile.municipality}-{profile.ward}
@@ -383,19 +380,19 @@ export default function ProviderDashboard() {
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+                        <div>
                           <p className="text-sm text-gray-600 mb-1">Province</p>
-                          <p className="text-gray-800 font-medium">{profile.province}</p>
+                          <p className="text-gray-800">{profile.province}</p>
                         </div>
-                        <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+                        <div>
                           <p className="text-sm text-gray-600 mb-1">Coordinates</p>
-                          <p className="text-gray-800 font-medium">{profile.latitude}, {profile.longitude}</p>
+                          <p className="text-gray-800">{profile.latitude}, {profile.longitude}</p>
                         </div>
                       </div>
                     </div>
                     
                     <p className="text-sm text-gray-500 mt-4 flex items-center gap-1">
-                      <MapPin size={14} className="text-blue-600" />
+                      <MapPin size={14} />
                       Your service location for customer matching
                     </p>
                   </div>
@@ -403,77 +400,43 @@ export default function ProviderDashboard() {
 
                 {/* Right: Profile Picture */}
                 <div className="flex flex-col items-center">
-                  <div className="space-y-4">
-                    <div className="flex flex-col items-center">
-                      <div className="w-48 h-48 rounded-full overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 border-8 border-white shadow-2xl">
-                        {isEditing ? (
-                          <label className="cursor-pointer w-full h-full">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => {
-                                const file = e.target.files[0];
-                                if (file) {
-                                  const reader = new FileReader();
-                                  reader.onload = () => setProfilePic(reader.result);
-                                  reader.readAsDataURL(file);
-                                }
-                              }}
-                            />
-                            {profilePic ? (
-                              <img
-                                src={profilePic}
-                                alt="Profile preview"
-                                className="w-full h-full object-cover cursor-pointer"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-200">
-                                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 flex items-center justify-center shadow-lg">
-                                  <Edit2 size={24} className="text-white" />
-                                </div>
-                                <span className="text-sm text-gray-700">Click to upload</span>
-                              </div>
-                            )}
-                          </label>
-                        ) : (
-                          <img
-                            src={profilePic || "https://via.placeholder.com/192x192/4f46e5/ffffff?text=RS"}
-                            alt="Profile"
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                      </div>
-
-                      {isEditing && (
-                        <>
-                          <label className="mt-3 w-full flex items-center justify-center">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => {
-                                const file = e.target.files[0];
-                                if (file) {
-                                  const reader = new FileReader();
-                                  reader.onload = () => setProfilePic(reader.result);
-                                  reader.readAsDataURL(file);
-                                }
-                              }}
-                              className="hidden"
-                            />
-                            <span className="inline-block px-4 py-2 rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 text-sm text-blue-700 hover:shadow-sm hover:scale-[1.02] transition-all">
-                              Choose photo
-                            </span>
-                          </label>
-                          
-                          <p className="text-xs text-gray-500 mt-2 text-center">
-                            {profilePic ? "Photo selected" : "No photo selected"}
-                          </p>
-                          <p className="text-xs text-gray-400 mt-1 text-center">JPG/PNG, max 5MB</p>
-                        </>
-                      )}
-                    </div>
+                  <div className="relative w-48 h-48 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden shadow-lg border-8 border-white">
+                    {isEditing ? (
+                      <label className="cursor-pointer w-full h-full flex items-center justify-center">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = () => setProfilePic(reader.result);
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                        <div className="text-center p-4">
+                          <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gray-600 flex items-center justify-center">
+                            <Edit2 size={24} className="text-white" />
+                          </div>
+                          <p className="text-sm font-medium text-gray-700">Upload Professional Photo</p>
+                          <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 2MB</p>
+                        </div>
+                      </label>
+                    ) : (
+                      <img
+                        src={profilePic || "https://via.placeholder.com/192x192/374151/ffffff?text=RS"}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    )}
                   </div>
+                  {!isEditing && (
+                    <p className="mt-4 text-sm text-gray-500 text-center">
+                      Click "Edit Profile" to update your professional photo
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -490,9 +453,9 @@ export default function ProviderDashboard() {
             
             <div className="space-y-6 max-w-5xl mx-auto">
               {pendingRequests.length === 0 ? (
-                <div className="text-center py-16 bg-white rounded-xl shadow-lg border border-gray-200">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 flex items-center justify-center">
-                    <ClipboardList size={32} className="text-amber-600" />
+                <div className="text-center py-16 bg-white rounded-xl shadow border border-gray-200">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                    <ClipboardList size={32} className="text-gray-600" />
                   </div>
                   <h4 className="text-xl font-semibold text-gray-700">No Pending Requests</h4>
                   <p className="text-gray-500 mt-2">You don't have any pending service requests</p>
@@ -503,7 +466,7 @@ export default function ProviderDashboard() {
                     key={request.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300"
+                    className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200"
                   >
                     <div className="p-6">
                       <div className="flex flex-col lg:flex-row gap-6">
@@ -514,51 +477,45 @@ export default function ProviderDashboard() {
                             <p className="text-gray-600 mt-1">{request.location}</p>
                           </div>
                           
-                          <div className="flex flex-col gap-3 text-sm text-gray-600">
-                            <span className="flex items-center gap-2">
-                              <button
-                                onClick={() => handleOpenMap(request.latitude, request.longitude, request.customerName)}
-                                className="p-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-600 rounded-lg transition-all flex items-center justify-center shadow-sm border border-blue-100"
-                                title="View on Map"
-                              >
-                                <MapPin size={14} />
-                              </button>
-                              <span className="text-gray-800 font-medium">Distance: {request.distance}</span>
+                          <div className="flex flex-col gap-2 text-sm text-gray-600">
+                            <span className="flex items-center gap-1">
+                              <MapPin size={14} />
+                              Distance: {request.distance}
                             </span>
-                            
-                            <span className="flex items-center gap-2">
-                              <div className="p-1.5 bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg border border-gray-100">
-                                <Phone size={14} className="text-gray-600" />
-                              </div>
-                              <span className="text-gray-800 font-medium">{request.phone}</span>
+                            <span className="flex items-center gap-1">
+                              <Phone size={14} />
+                              {request.phone}
                             </span>
                           </div>
                         </div>
 
                         {/* Right side - Buttons Stack */}
-                        <div className="flex flex-col items-end gap-4 min-w-[200px]">
-                          {/* Accept and Deny buttons */}
+                        <div className="flex flex-col items-end gap-3 min-w-[200px]">
+                          {/* Call button on top */}
+                          <button
+                            onClick={() => handleCall(request.phone)}
+                            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center gap-2 self-end"
+                          >
+                            <FaPhone className="rotate-90" />
+                            <span>Call</span>
+                          </button>
+                          
+                          {/* Accept and Deny buttons below */}
                           <div className="flex gap-3 w-full">
                             <button
                               onClick={() => handleAcceptRequest(request.id, request.customerName)}
-                              className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 active:scale-[0.98] text-white rounded-lg transition-all duration-200 font-medium flex items-center justify-center gap-2 shadow-lg shadow-emerald-100 hover:shadow-emerald-200"
+                              className="w-full px-4 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium flex items-center justify-center gap-2"
                             >
                               <CheckCircle size={16} />
-                              <span className="font-semibold">Accept</span>
+                              <span>Accept</span>
                             </button>
                             <button
                               onClick={() => handleDenyRequest(request.id, request.customerName)}
-                              className="flex-1 px-4 py-3 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 active:scale-[0.98] text-white rounded-lg transition-all duration-200 font-medium flex items-center justify-center gap-2 shadow-lg shadow-rose-100 hover:shadow-rose-200"
+                              className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium border border-gray-300 flex items-center justify-center gap-2"
                             >
                               <X size={16} />
-                              <span className="font-semibold">Deny</span>
+                              <span>Deny</span>
                             </button>
-                          </div>
-                          
-                          {/* Status indicator */}
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
-                            <span>Waiting for your response</span>
                           </div>
                         </div>
                       </div>
@@ -580,9 +537,9 @@ export default function ProviderDashboard() {
             
             <div className="space-y-6 max-w-5xl mx-auto">
               {acceptedRequests.length === 0 ? (
-                <div className="text-center py-16 bg-white rounded-xl shadow-lg border border-gray-200">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-emerald-100 to-green-100 flex items-center justify-center">
-                    <CheckCircle size={32} className="text-emerald-600" />
+                <div className="text-center py-16 bg-white rounded-xl shadow border border-gray-200">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                    <CheckCircle size={32} className="text-gray-600" />
                   </div>
                   <h4 className="text-xl font-semibold text-gray-700">No Accepted Requests</h4>
                   <p className="text-gray-500 mt-2">You haven't accepted any service requests yet</p>
@@ -593,65 +550,56 @@ export default function ProviderDashboard() {
                     key={request.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300"
+                    className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200"
                   >
                     <div className="p-6">
                       <div className="flex flex-col lg:flex-row gap-6">
                         {/* Left side - Customer Info */}
                         <div className="flex-1">
                           <div className="mb-4">
-                            <div className="flex items-center gap-2">
-                              <h2 className="text-xl font-bold text-gray-900">{request.customerName}</h2>
-                              <span className="px-2 py-1 bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700 rounded-full text-xs font-medium flex items-center gap-1">
-                                <Clock size={10} />
-                                Accepted
-                              </span>
-                            </div>
+                            <h2 className="text-xl font-bold text-gray-900">{request.customerName}</h2>
                             <p className="text-gray-600 mt-1">{request.location}</p>
                           </div>
                           
-                          <div className="flex flex-col gap-3 text-sm text-gray-600">
-                            <span className="flex items-center gap-2">
-                              <div className="p-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
-                                <MapPin size={14} className="text-blue-600" />
-                              </div>
-                              <span className="text-gray-800 font-medium">Distance: {request.distance}</span>
+                          <div className="flex flex-col gap-2 text-sm text-gray-600">
+                            <span className="flex items-center gap-1">
+                              <MapPin size={14} />
+                              Distance: {request.distance}
                             </span>
-                            <span className="flex items-center gap-2">
-                              <div className="p-1.5 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-100">
-                                <Phone size={14} className="text-green-600" />
-                              </div>
-                              <span className="text-gray-800 font-medium">{request.phone}</span>
+                            <span className="flex items-center gap-1">
+                              <Phone size={14} />
+                              {request.phone}
                             </span>
                           </div>
                         </div>
 
-                        {/* Right side - Action Buttons */}
-                        <div className="flex flex-col items-end gap-4 min-w-[200px]">
-                          <div className="flex gap-3 w-full">
-                            <button
-                              onClick={() => handleCall(request.phone)}
-                              className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 active:scale-[0.98] text-white rounded-lg transition-all duration-200 font-medium flex items-center justify-center gap-2 shadow-lg shadow-green-100 hover:shadow-green-200"
-                            >
-                              <FaPhone className="rotate-90" />
-                              <span className="font-semibold">Call</span>
-                            </button>
-                            
-                            <button
-                              onClick={() => handleOpenMap(request.latitude, request.longitude, request.customerName)}
-                              className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 active:scale-[0.98] text-white rounded-lg transition-all duration-200 font-medium flex items-center justify-center gap-2 shadow-lg shadow-blue-100 hover:shadow-blue-200"
-                            >
-                              <FaMapMarkerAlt />
-                              <span className="font-semibold">Map</span>
-                            </button>
-                          </div>
+                        {/* Right side - Buttons Stack */}
+                        <div className="flex flex-col items-end gap-3 min-w-[200px]">
+                          {/* Call button on top */}
+                          <button
+                            onClick={() => handleCall(request.phone)}
+                            className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center gap-2"
+                          >
+                            <FaPhone className="rotate-90" />
+                            <span>Call</span>
+                          </button>
                           
+                          {/* Map button */}
+                          <button
+                            onClick={() => handleOpenMap(request.latitude, request.longitude, request.customerName)}
+                            className="w-full px-4 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium flex items-center justify-center gap-2"
+                          >
+                            <MapPin size={16} />
+                            <span>Map</span>
+                          </button>
+                          
+                          {/* Complete button */}
                           <button
                             onClick={() => handleCompleteJob(request.id, request.customerName)}
-                            className="w-full px-4 py-3 bg-gradient-to-r from-gray-800 to-gray-900 hover:from-gray-900 hover:to-black active:scale-[0.98] text-white rounded-lg transition-all duration-200 font-medium flex items-center justify-center gap-2 shadow-lg"
+                            className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium border border-gray-300 flex items-center justify-center gap-2"
                           >
                             <CheckCircle size={16} />
-                            <span className="font-semibold">Mark Complete</span>
+                            <span>Complete</span>
                           </button>
                         </div>
                       </div>
@@ -673,26 +621,21 @@ export default function ProviderDashboard() {
             
             <div className="space-y-6">
               {completedJobs.length === 0 ? (
-                <div className="text-center py-16 bg-white rounded-xl shadow-lg border border-gray-200">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-purple-100 to-violet-100 flex items-center justify-center">
-                    <Award size={32} className="text-purple-600" />
+                <div className="text-center py-16 bg-white rounded-xl shadow border border-gray-200">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                    <CheckCircle size={32} className="text-gray-600" />
                   </div>
                   <h4 className="text-xl font-semibold text-gray-700">No Completed Jobs</h4>
                   <p className="text-gray-500 mt-2">You haven't completed any jobs yet</p>
                 </div>
               ) : (
                 completedJobs.map((job) => (
-                  <motion.div
-                    key={job.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300"
-                  >
-                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                  <div key={job.id} className="bg-white rounded-xl shadow border border-gray-200 p-6">
+                    <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
                           <h4 className="text-lg font-bold text-gray-900">{job.customerName}</h4>
-                          <span className="px-3 py-1 bg-gradient-to-r from-purple-50 to-violet-50 text-purple-700 rounded-full text-xs font-medium border border-purple-200">
+                          <span className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
                             {job.service}
                           </span>
                           <div className="flex items-center gap-1">
@@ -700,35 +643,21 @@ export default function ProviderDashboard() {
                               <Star
                                 key={i}
                                 size={16}
-                                className={i < job.rating ? "text-amber-500 fill-current" : "text-gray-300"}
+                                className={i < job.rating ? "text-yellow-500 fill-current" : "text-gray-300"}
                               />
                             ))}
                           </div>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Calendar size={14} className="text-blue-600" />
-                            <span>{job.date}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Award size={14} className="text-amber-600" />
-                            <span className="font-medium">{job.earnings}</span>
-                          </div>
-                        </div>
-                        
                         {job.review && (
-                          <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
-                            <p className="text-sm text-blue-600 mb-1 font-medium flex items-center gap-1">
-                              <MessageCircle size={14} />
-                              Customer Review:
-                            </p>
-                            <p className="text-gray-800">"{job.review}"</p>
+                          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                            <p className="text-sm text-gray-600 mb-1">Customer Review:</p>
+                            <p className="text-gray-800 italic">"{job.review}"</p>
                           </div>
                         )}
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 ))
               )}
             </div>
@@ -747,12 +676,12 @@ function SidebarItem({ icon, label, active, onClick, badge }) {
       onClick={onClick}
       className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 ${
         active
-          ? "bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg"
-          : "hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 text-gray-700 hover:text-gray-900"
+          ? "bg-gray-900 text-white shadow"
+          : "hover:bg-gray-100 text-gray-700 hover:text-gray-900"
       }`}
     >
       <div className="flex items-center gap-3">
-        <div className={`p-2 rounded-lg ${active ? 'bg-white/20' : 'bg-gradient-to-r from-blue-100 to-indigo-100'}`}>
+        <div className={`p-2 rounded-lg ${active ? 'bg-white/20' : 'bg-gray-100'}`}>
           {icon}
         </div>
         <span className="font-medium">{label}</span>
@@ -760,7 +689,7 @@ function SidebarItem({ icon, label, active, onClick, badge }) {
       {badge !== null && (
         <span
           className={`px-2 py-1 rounded-full text-xs font-medium ${
-            active ? 'bg-white/20' : 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700'
+            active ? 'bg-white/20' : 'bg-gray-100 text-gray-700'
           }`}
         >
           {badge}
@@ -779,12 +708,12 @@ function InfoField({ label, value, isEditing, onChange, type = "text", disabled 
           type={type}
           value={value}
           onChange={onChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-colors bg-white"
           placeholder={`Enter ${label.toLowerCase()}`}
         />
       ) : (
-        <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
-          <p className="text-gray-800 font-medium">{value}</p>
+        <div className="px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
+          <p className="text-gray-800">{value}</p>
         </div>
       )}
     </div>

@@ -1,25 +1,34 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { HiX, HiLogout, HiLocationMarker } from "react-icons/hi";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useNavigate,useLocation} from "react-router-dom";
+import { HiX, HiLogout, HiLocationMarker, HiUser } from "react-icons/hi";
+import Logo from "../assets/logo.png"; //
 
 const Header = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [role, setRole] = useState("customer"); // customer | provider
+  const [role, setRole] = useState("customer");
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({ email: "", password: "" });
   const [location, setLocation] = useState("Select Location");
   const [locationVerified, setLocationVerified] = useState(false);
-
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+const locationPath = useLocation();
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const userData = JSON.parse(localStorage.getItem("userData") || "{}");
   const isLoggedIn = !!token;
   const userName = userData.name || "User";
+  const dropdownRef = useRef(null);
 
-  // 🔐 Redirect if already logged in
+ // ✅ FIXED: prevent redirect flickering
   useEffect(() => {
-    if (isLoggedIn && userData.role) {
+    if (!token || !userData.role) return;
+
+    const isDashboard =
+      locationPath.pathname.startsWith("/customer-dashboard") ||
+      locationPath.pathname.startsWith("/provider-dashboard");
+
+    if (!isDashboard) {
       navigate(
         userData.role === "customer"
           ? "/customer-dashboard"
@@ -27,7 +36,24 @@ const Header = () => {
         { replace: true }
       );
     }
-  }, [isLoggedIn, userData.role, navigate]);
+  }, [token, userData.role, locationPath.pathname, navigate]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Prevent body scroll when drawer is open
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? "hidden" : "unset";
+  }, [drawerOpen]);
+
 
   // Detect location
   const detectLocation = () => {
@@ -39,14 +65,11 @@ const Header = () => {
           setLocationVerified(true);
         },
         () => {
-          setLocation("Location access denied");
+          setLocation("Location access was denied");
           setLocationVerified(false);
         }
       );
-    } else {
-      setLocation("Not supported");
-      setLocationVerified(false);
-    }
+    } 
   };
 
   // Validate login form
@@ -121,7 +144,14 @@ const Header = () => {
     localStorage.removeItem("role");
     setLocationVerified(false);
     setLocation("Select Location");
+    setDropdownOpen(false);
     navigate("/", { replace: true });
+  };
+
+  // Go to profile dashboard
+  const goToProfile = () => {
+    setDropdownOpen(false);
+    navigate(userData.role === "customer" ? "/customer-dashboard" : "/provider-dashboard");
   };
 
   // Prevent body scroll when drawer is open
@@ -132,59 +162,100 @@ const Header = () => {
   return (
     <>
       {/* Header */}
-      <header className="fixed top-0 left-0 w-full z-40 bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      <header className="fixed top-0 left-0 w-full z-40 bg-white border-b border-gray-100 backdrop-blur-md bg-opacity-95">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-[#c49b6f] to-[#a67c52] flex items-center justify-center">
-                <span className="text-white font-bold text-xl">PC</span>
-              </div>
+            <Link to="/" className="flex items-center space-x-3 group">
+               <img
+            src={Logo} 
+            alt="Pro-Connect Logo"
+            className="w-10 h-10 md:w-12 md:h-12 relative z-10 rounded-full shadow-md"
+          />
               <div className="hidden sm:block">
-                <span className="text-xl font-bold text-gray-900">Pro</span>
-                <span className="text-xl font-bold text-gray-500">Connect</span>
+                <span className="text-4xl font-bold text-black">Pro-</span>
+                <span className="text-3xl font-bold text-gray-400">Connect</span>
               </div>
             </Link>
 
+            <div className="relative flex items-center gap-2.5">
+        
             {/* Nav Links */}
-            <nav className="flex items-center space-x-8">
-              <Link to="/about" className="text-gray-700 hover:text-[#a67c52] font-medium">
+            <nav className="flex items-center space-x-10">
+              <Link to="/about" className="text-gray-600 hover:text-black font-medium text-base transition-colors duration-200 relative group">
                 About Us
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-black transition-all duration-300 group-hover:w-full"></span>
               </Link>
-              <Link to="/faq" className="text-gray-700 hover:text-[#a67c52] font-medium">
+              <Link to="/faq" className="text-gray-600 hover:text-black font-medium text-base transition-colors duration-200 relative group">
                 FAQs
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-black transition-all duration-300 group-hover:w-full"></span>
               </Link>
 
               {!isLoggedIn ? (
                 <button
                   onClick={() => setDrawerOpen(true)}
-                  className="px-6 py-2 bg-[#c49b6f] text-white rounded-lg hover:bg-[#a67c52] font-medium transition-colors shadow-sm"
+                  className="px-8 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
                 >
                   Login
                 </button>
               ) : (
-                <div className="flex items-center space-x-4">
-                  <div className="hidden md:flex items-center space-x-2 px-3 py-1 bg-gray-100 rounded-lg">
-                    <HiLocationMarker className="text-green-600" />
-                    <span className="text-sm font-medium text-gray-700">{location}</span>
+                <div className="flex items-center space-x-5" ref={dropdownRef}>
+                 
+                  {/* User Button with Dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setDropdownOpen(!dropdownOpen)}
+                      className="flex items-center space-x-3 px-4 py-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-200"
+                    >
+                      <div className="w-9 h-9 rounded-full bg-black flex items-center justify-center transform hover:scale-105 transition-transform duration-200">
+                        <span className="text-white font-bold text-sm">
+                          {userName.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <span className="font-semibold text-gray-900 hidden md:block">{userName}</span>
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {dropdownOpen && (
+                      <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50 animate-fadeIn">
+                        {/* User Info */}
+                        <div className="px-5 py-4 border-b border-gray-100">
+                          <p className="font-bold text-gray-900 text-lg">{userName}</p>
+                          <p className="text-sm text-gray-500 capitalize mt-1">{userData.role || "User"}</p>
+                        </div>
+
+                        {/* Profile Button */}
+                        <button
+                          onClick={goToProfile}
+                          className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 text-left transition-colors duration-200 group"
+                        >
+                          <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition-colors">
+                            <HiUser className="text-gray-600 text-lg" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900">My Profile</p>
+                            <p className="text-xs text-gray-500 mt-0.5">Go to your dashboard</p>
+                          </div>
+                        </button>
+
+                        {/* Logout Button */}
+                        <div className="border-t border-gray-100 pt-2 px-3 mt-2">
+                          <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black text-white rounded-xl hover:bg-gray-800 transition-all duration-200 font-semibold transform hover:scale-[1.02]"
+                          >
+                            <HiLogout className="text-lg" />
+                            Logout
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <button
-                    onClick={() =>
-                      navigate(userData.role === "customer" ? "/customer-dashboard" : "/provider-dashboard")
-                    }
-                    className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#c49b6f] to-[#a67c52] flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">
-                        {userName.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <span className="font-medium text-gray-900 hidden md:block">{userName}</span>
-                  </button>
                 </div>
               )}
             </nav>
           </div>
+        </div>
         </div>
       </header>
 
@@ -197,64 +268,74 @@ const Header = () => {
         {/* Overlay */}
         <div
           className={`absolute inset-0 bg-black transition-opacity duration-300 ease-in-out ${
-            drawerOpen ? "opacity-30" : "opacity-0"
+            drawerOpen ? "opacity-50" : "opacity-0"
           }`}
           onClick={() => setDrawerOpen(false)}
         />
 
         {/* Drawer */}
         <div
-          className={`absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl transition-transform duration-300 ease-in-out ${
+          className={`absolute right-0 top-0 h-full w-full max-w-lg bg-white shadow-2xl transition-transform duration-300 ease-in-out ${
             drawerOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
           <div className="h-full flex flex-col">
             {/* Drawer Header */}
-            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
+            <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between bg-linear-to-r from-gray-50 to-white">
+              <h2 className="text-3xl font-bold text-black">Welcome Back</h2>
               <button
                 onClick={() => setDrawerOpen(false)}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="p-2.5 rounded-xl hover:bg-gray-100 transition-all duration-200 group"
               >
-                <HiX className="text-gray-700 text-xl" />
+                <HiX className="text-gray-700 text-2xl group-hover:rotate-90 transition-transform duration-300" />
               </button>
             </div>
 
             {/* Drawer Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-8">
               {/* Location */}
-              <div className="mb-8 p-4 bg-gradient-to-r from-[#f5f2ea] to-[#e8f1f2] rounded-xl">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-2">
-                    <HiLocationMarker className={locationVerified ? "text-green-600" : "text-yellow-600"} />
-                    <span className={`font-medium ${locationVerified ? "text-green-600" : "text-yellow-600"}`}>
+              <div className={`mb-8 p-5 rounded-2xl border-2 transition-all duration-300 ${
+                locationVerified 
+                  ? 'bg-linear-to-br from-green-50 to-emerald-50 border-green-200' 
+                  : 'bg-linear-to-br from-gray-50 to-slate-50 border-gray-200'
+              }`}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      locationVerified ? 'bg-green-100' : 'bg-gray-200'
+                    }`}>
+                      <HiLocationMarker className={`text-xl ${locationVerified ? "text-green-600" : "text-blue-500"}`} />
+                    </div>
+                    <span className={`font-bold text-base ${locationVerified ? "text-green-700" : "text-gray-600"}`}>
                       {locationVerified ? "Location Verified ✓" : "Location Required"}
                     </span>
                   </div>
                   <button
                     onClick={detectLocation}
-                    className="text-sm text-[#a67c52] hover:text-[#8b6a4a] font-medium"
+                    className="px-5 py-2 bg-blue-700 text-white text-sm rounded-lg hover:bg-blue-800 font-semibold transition-all duration-200 transform hover:scale-105"
                   >
-                    Detect
+                    Allow Loaction
                   </button>
                 </div>
-                <p className={`text-sm font-medium ${locationVerified ? "text-green-600" : "text-gray-700"}`}>
+                <p className={`text-sm font-semibold ml-1 ${locationVerified ? "text-green-600" : "text-gray-600"}`}>
                   {location}
                 </p>
-                {!locationVerified && <p className="text-xs text-red-600 mt-1">⚠ Please enable location services to continue</p>}
+                {!locationVerified && (
+                  <p className="text-xs text-red-600 mt-2 ml-1 font-medium">⚠ Enable location to continue</p>
+                )}
               </div>
 
               {/* Login Form */}
-              <form className="flex flex-col gap-5" onSubmit={handleLogin}>
+              <form className="flex flex-col gap-6" onSubmit={handleLogin}>
                 {/* Role Selector */}
-                <div className="flex justify-center gap-4 mb-6">
+                <div className="flex justify-center gap-4 mb-4">
                   <button
                     type="button"
                     onClick={() => setRole("customer")}
-                    className={`px-5 py-2 rounded-full font-medium border transition ${
+                    className={`px-8 py-3 rounded-xl font-semibold border-2 transition-all duration-300 transform hover:scale-105 ${
                       role === "customer"
-                        ? "bg-[#c49b6f] text-white border-[#c49b6f]"
-                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                        ? "bg-black text-white border-black shadow-lg"
+                        : "bg-white text-gray-700 border-gray-300 hover:border-gray-400"
                     }`}
                   >
                     Customer
@@ -262,72 +343,72 @@ const Header = () => {
                   <button
                     type="button"
                     onClick={() => setRole("provider")}
-                    className={`px-5 py-2 rounded-full font-medium border transition ${
+                    className={`px-8 py-3 rounded-xl font-semibold border-2 transition-all duration-300 transform hover:scale-105 ${
                       role === "provider"
-                        ? "bg-[#c49b6f] text-white border-[#c49b6f]"
-                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                        ? "bg-black text-white border-black shadow-lg"
+                        : "bg-white text-gray-700 border-gray-300 hover:border-gray-400"
                     }`}
                   >
-                    Service Provider
+                    Provider
                   </button>
                 </div>
 
                 {/* Email */}
                 <div>
-                  <label className="block text-gray-700 mb-1 font-medium">Email</label>
+                  <label className="block text-gray-700 mb-2 font-semibold text-sm">Email Address</label>
                   <input
                     type="email"
                     name="email"
                     value={loginData.email}
-                    onChange={(e) => handleChange(e)}
+                    onChange={handleChange}
                     placeholder="example@gmail.com"
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3"
+                    className="w-full border-2 border-gray-200 rounded-xl px-5 py-3.5 focus:border-black focus:outline-none transition-colors duration-200 text-gray-800 font-medium"
                     required
                   />
-                  {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                  {errors.email && <p className="text-red-500 text-sm mt-2 font-medium">{errors.email}</p>}
                 </div>
 
                 {/* Password */}
                 <div>
-                  <label className="block text-gray-700 mb-1 font-medium">Password</label>
+                  <label className="block text-gray-700 mb-2 font-semibold text-sm">Password</label>
                   <input
                     type="password"
                     name="password"
                     value={loginData.password}
-                    onChange={(e) => handleChange(e)}
+                    onChange={handleChange}
                     placeholder="Enter your password"
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3"
+                    className="w-full border-2 border-gray-200 rounded-xl px-5 py-3.5 focus:border-black focus:outline-none transition-colors duration-200 text-gray-800 font-medium"
                     required
                   />
-                  {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+                  {errors.password && <p className="text-red-500 text-sm mt-2 font-medium">{errors.password}</p>}
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full px-4 py-3 bg-[#c49b6f] text-white rounded-xl font-semibold"
+                  className="w-full px-5 py-4 bg-black text-white rounded-xl font-bold text-lg hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                 >
                   {loading ? "Logging in..." : "Login"}
                 </button>
               </form>
 
               {/* Registration Links */}
-              <div className="mt-8 text-center">
-                <p className="text-gray-500 mb-4 font-medium">Don't have an account? Register as:</p>
+              <div className="mt-10 text-center">
+                <p className="text-gray-600 mb-5 font-semibold">Don't have an account?</p>
                 <div className="flex justify-center gap-4">
                   <Link
                     to="/register-customer"
                     onClick={() => setDrawerOpen(false)}
-                    className="px-5 py-2 rounded-xl border border-[#c49b6f] text-[#a67c52] hover:bg-[#c49b6f]/10 transition-colors"
+                    className="px-7 py-3 rounded-xl border-2 border-black text-black hover:bg-black hover:text-white transition-all duration-300 font-semibold transform hover:scale-105"
                   >
-                    Customer
+                    Register as Customer
                   </Link>
                   <Link
                     to="/register-provider"
                     onClick={() => setDrawerOpen(false)}
-                    className="px-5 py-2 rounded-xl border border-[#c49b6f] text-[#a67c52] hover:bg-[#c49b6f]/10 transition-colors"
+                    className="px-7 py-3 rounded-xl border-2 border-black text-black hover:bg-black hover:text-white transition-all duration-300 font-semibold transform hover:scale-105"
                   >
-                    Service Provider
+                    Register as Provider
                   </Link>
                 </div>
               </div>
@@ -338,16 +419,27 @@ const Header = () => {
 
       {/* Mobile Logout */}
       {isLoggedIn && (
-        <div className="md:hidden fixed bottom-4 right-4 z-40">
+        <div className="md:hidden fixed bottom-6 right-6 z-40">
           <button
             onClick={handleLogout}
-            className="px-4 py-2 bg-red-100 text-red-600 rounded-lg font-medium hover:bg-red-200 flex items-center space-x-2 shadow-sm"
+            className="px-5 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 flex items-center space-x-2 shadow-2xl transform hover:scale-105 transition-all duration-200"
           >
-            <HiLogout />
+            <HiLogout className="text-lg" />
             <span>Logout</span>
           </button>
         </div>
       )}
+
+      {/* Animations */}
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.25s ease-out;
+        }
+      `}</style>
     </>
   );
 };
