@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { 
   LogOut, 
   User, 
@@ -8,17 +8,17 @@ import {
   CheckCircle, 
   Mail, 
   MapPin, 
-  Edit2, 
-  Save,
   Phone,
-  Navigation,
-  Award,
   Star,
-  Calendar
+  Award,
+  Calendar,
+  Save,
+  Edit2,
+  Navigation
 } from "lucide-react";
-import { FaPhone, FaCheckCircle } from "react-icons/fa";
+import { FaPhone, FaCheckCircle, FaMapMarkerAlt, FaStar, FaRegClock, FaBriefcase, FaChevronDown, FaChevronUp } from "react-icons/fa";
 
-// Services - Updated with new service names
+// Services
 import plumber from "../assets/services/plumber.jpeg";
 import electrician from "../assets/services/electrician.jpeg";
 import tutor from "../assets/services/tutor.jpeg";
@@ -32,9 +32,9 @@ import photographer from "../assets/services/photographer.jpeg";
 import bandbaja from "../assets/services/bandbaja.jpeg";
 import chef from "../assets/services/chef.jpeg";
 import locksmith from "../assets/services/locksmith.jpeg";
-import sofaCleaner from "../assets/services/tailoring.jpeg"; // Changed from tailoring
+import tailoring from "../assets/services/tailoring.jpeg";
 import movers from "../assets/services/movers.jpeg";
-import waterproofing from "../assets/services/catering.jpeg"; // Changed from catering
+import catering from "../assets/services/catering.jpeg";
 
 const SERVICES = [
   { id: 1, title: "Plumber", img: plumber },
@@ -43,189 +43,152 @@ const SERVICES = [
   { id: 4, title: "Painter", img: painter },
   { id: 5, title: "House Help", img: cleaner },
   { id: 6, title: "Babysitters", img: babysitter },
-  { id: 7, title: "Beauty & Salon", img: beautician },
+  { id: 7, title: "Sofa/Carpet Cleaner", img: beautician },
   { id: 8, title: "Event Decorators", img: decorator },
   { id: 9, title: "Carpenter", img: carpenter },
   { id: 10, title: "Photographer", img: photographer },
   { id: 11, title: "Band Baja", img: bandbaja },
   { id: 12, title: "Private Chef", img: chef },
   { id: 13, title: "Locksmith", img: locksmith },
-  { id: 14, title: "Sofa/Carpet Cleaner", img: sofaCleaner }, // Changed from Boutiques & Tailoring
+  { id: 14, title: "Laundry", img: tailoring },
   { id: 15, title: "Movers & Packers", img: movers },
-  { id: 16, title: "Waterproofing", img: waterproofing }, // Changed from Catering Server
+  { id: 16, title: "Waterproofing", img: catering },
 ];
+
+// Mock providers
+const MOCK_PROVIDERS = {
+  plumber: [
+    { id: 1, name: "Ram Shrestha", experience: "5 Years", bio: "Residential & commercial plumbing expert.", phone: "+977980000001" },
+    { id: 2, name: "Sita Adhikari", experience: "3 Years", bio: "Certified plumber with quality service.", phone: "+977980000002" },
+  ],
+  electrician: [
+    { id: 3, name: "Rajesh Koirala", experience: "6 Years", bio: "Expert electrician for home & industrial wiring.", phone: "+977980000003" },
+  ],
+  "home tutors": [
+    { id: 4, name: "Nabin Sharma", experience: "4 Years", bio: "Home tutor for Math & Science.", phone: "+977980000004" },
+  ],
+};
+
+// Mock data for other sections
+const MOCK_REQUESTS = [
+  { 
+    id: 1, 
+    name: "Ram Shrestha", 
+    experience: "5 Years", 
+    bio: "Residential & commercial plumbing expert.", 
+    phone: "+977980000001",
+    service: "Plumber",
+    distance: "2.5 km away",
+    rating: 4.8,
+    servicesCount: 124,
+    address: "Kathmandu, Nepal",
+    online: true,
+    skills: ["Pipe Repair", "Drain Cleaning", "Fixture Installation", "Water Heater"]
+  }
+];
+
+const MOCK_COMPLETED_SERVICES = [
+  {
+    id: 1,
+    provider: "Ram Shrestha",
+    service: "Plumber",
+    experience: "5 Years",
+    rating: 4.8,
+    servicesCount: 124,
+    skills: ["Pipe Repair", "Drain Cleaning"],
+    review: "Excellent service, very professional!"
+  }
+];
+
+const MOCK_PROFILE = {
+  name: "Aastha Aryal",
+  email: "aastha@gmail.com",
+  street: "Kathmandu-03",
+  district: "Kathmandu",
+  municipality: "Kathmandu",
+  ward: "03",
+  province: "Bagmati Province",
+  latitude: "27.7172",
+  longitude: "85.3240"
+};
 
 export default function CustomerDashboard() {
   const navigate = useNavigate();
+  const { category } = useParams(); // from URL
   const [activeTab, setActiveTab] = useState("services");
+  const [selectedCategory, setSelectedCategory] = useState(category || "");
+  
+  // State variables that were missing
   const [isEditing, setIsEditing] = useState(false);
   const [phone, setPhone] = useState("98XXXXXXXXX");
+  const [profilePic, setProfilePic] = useState("");
+  const [requests] = useState(MOCK_REQUESTS);
   const [expandedIds, setExpandedIds] = useState([]);
-  const [profilePic, setProfilePic] = useState(null);
+  const [completedServices] = useState(MOCK_COMPLETED_SERVICES);
+  const [profile] = useState(MOCK_PROFILE);
 
-  // Mock location data (would come from backend)
-  const profile = {
-    name: "Aastha Aryal",
-    email: "aastha@gmail.com",
-    province: "Bagmati",
-    district: "Kathmandu",
-    municipality: "Kathmandu Metropolitan City",
-    ward: "03", 
-    street: "New Baneshwor",
-    latitude: "27.7172",
-    longitude: "85.3240",
-  };
+  // Update selectedCategory when URL changes
+  useEffect(() => {
+    if (category) setSelectedCategory(category.replace(/-/g, " "));
+  }, [category]);
 
-  const requests = [
-    {
-      id: 1,
-      name: "Ram Shrestha",
-      service: "Plumber",
-      rating: 4.2,
-      servicesCount: 34,
-      experience: "5 Years",
-      bio: "Residential & commercial plumbing expert. Specialized in modern pipe fitting and leak detection.",
-      phone: "+977980000001",
-      distance: "1.2 km",
-      address: "New Baneshwor, Kathmandu",
-      online: true,
-      skills: ["Pipe Fitting", "Leak Repair", "Drain Cleaning", "Water Heater"],
-    },
-    {
-      id: 2,
-      name: "Sita Adhikari",
-      service: "Electrician",
-      rating: 4.7,
-      servicesCount: 21,
-      experience: "3 Years",
-      bio: "Certified electrician with quality service. Expert in home wiring and electrical safety.",
-      phone: "+977980000002",
-      distance: "2.5 km",
-      address: "Kalanki, Kathmandu",
-      online: false,
-      skills: ["Wiring", "Switch Repair", "Panel Installation"],
-    },
-  ];
-
-  const completedServices = [
-    { 
-      id: 1, 
-      provider: "Bikash Thapa", 
-      service: "Painter", 
-      date: "2024-03-15",
-      rating: 4.5,
-      servicesCount: 28,
-      experience: "4 Years",
-      skills: ["Wall Painting", "Texture", "Waterproofing", "Polish"],
-      review: "Excellent work! Very professional and neat finishing."
-    },
-    { 
-      id: 2, 
-      provider: "Nabin Sharma", 
-      service: "Tutor", 
-      date: "2024-03-10",
-      rating: 4.8,
-      servicesCount: 15,
-      experience: "2 Years",
-      skills: ["Mathematics", "Physics", "Chemistry", "Test Prep"],
-      review: "Great teaching methodology. My child's grades improved significantly."
-    },
-  ];
-  
-  const toggleExpand = (id) => {
-    setExpandedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
+  const handleCategoryClick = (service) => {
+    const slug = service.title.toLowerCase().replace(/\s+/g, "-");
+    setSelectedCategory(service.title);
+    setActiveTab("services");
+    navigate(`/customer-dashboard/${slug}`);
   };
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
-    // Navigate to home/login - adjust to your routing if different
     navigate("/home");
+  };
+
+  // Providers for the selected category
+  const providers = selectedCategory ? MOCK_PROVIDERS[selectedCategory.toLowerCase()] || [] : [];
+
+  // Function to toggle expand/collapse
+  const toggleExpand = (id) => {
+    setExpandedIds(prev => 
+      prev.includes(id) 
+        ? prev.filter(item => item !== id)
+        : [...prev, id]
+    );
   };
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50 text-gray-800">
-      {/* PREMIUM SIDEBAR */}
+      {/* Sidebar */}
       <div className="lg:w-80 bg-white p-6 shadow-lg border-r border-gray-200 flex flex-col">
         <div className="text-center mb-8">
           <div className="relative w-32 h-32 mx-auto mb-4">
-            <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+            <div className="w-full h-full rounded-full bg-gray-700 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
               AA
             </div>
             <div className="absolute -bottom-2 right-2 w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center shadow-md border-4 border-white">
               <User size={18} className="text-white" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800">{profile.name}</h2>
-          <p className="text-sm text-gray-600 mt-1 flex items-center justify-center gap-1">
-            <Mail size={14} />
-            {profile.email}
-          </p>
-          <div className="mt-3 flex items-center justify-center gap-1 text-sm text-gray-600">
-            <MapPin size={14} />
-            <span>{profile.district}, {profile.municipality}-{profile.ward}</span>
-          </div>
-          <div className="mt-2 flex items-center justify-center gap-2">
-            <Phone size={14} className="text-gray-600" />
-            <span className="font-medium">{phone}</span>
-          </div>
+          <h2 className="text-2xl font-bold text-gray-800">Aastha Aryal</h2>
+          <p className="text-sm text-gray-600 mt-1 flex items-center justify-center gap-1"><Mail size={14} />aastha@gmail.com</p>
+          <div className="mt-3 flex items-center justify-center gap-1 text-sm text-gray-600"><MapPin size={14} /><span>Kathmandu, Kathmandu-03</span></div>
+          <div className="mt-2 flex items-center justify-center gap-2"><Phone size={14} className="text-gray-600" /><span className="font-medium">98XXXXXXXXX</span></div>
         </div>
 
         <nav className="mt-4 space-y-2 flex-1">
-          <SidebarItem
-            icon={<User size={20} />}
-            label="Personal Details"
-            active={activeTab === "details"}
-            onClick={() => setActiveTab("details")}
-            badge={null}
-          />
-          <SidebarItem
-            icon={<ClipboardList size={20} />}
-            label="My Requests"
-            active={activeTab === "requests"}
-            onClick={() => setActiveTab("requests")}
-            badge={requests.length}
-          />
-          <SidebarItem
-            icon={<CheckCircle size={20} />}
-            label="Services Taken"
-            active={activeTab === "servicesTaken"}
-            onClick={() => setActiveTab("servicesTaken")}
-            badge={completedServices.length}
-          />
-          <SidebarItem
-            icon={<ClipboardList size={20} />}
-            label="Browse Services"
-            active={activeTab === "services"}
-            onClick={() => setActiveTab("services")}
-            badge={SERVICES.length}
-          />
+          <SidebarItem icon={<User size={20} />} label="Personal Details" active={activeTab === "details"} onClick={() => setActiveTab("details")} />
+          <SidebarItem icon={<ClipboardList size={20} />} label="My Requests" active={activeTab === "requests"} onClick={() => setActiveTab("requests")} badge={providers.length} />
+          <SidebarItem icon={<CheckCircle size={20} />} label="Services Taken" active={activeTab === "servicesTaken"} onClick={() => setActiveTab("servicesTaken")} badge={0} />
+          <SidebarItem icon={<ClipboardList size={20} />} label="Browse Services" active={activeTab === "services"} onClick={() => setActiveTab("services")} badge={SERVICES.length} />
         </nav>
-
-        <button
-          onClick={handleLogout}
-          className="mt-8 flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors duration-200"
-        >
-          <LogOut size={18} />
-          <span className="font-medium">Logout</span>
-        </button>
       </div>
 
-      {/* MAIN CONTENT AREA */}
+      {/* Main Content */}
       <div className="flex-1 p-6 lg:p-8">
-        {/* HEADER */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, <span className="text-gray-700">{profile.name.split(" ")[0]}!</span>
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Manage your services, track requests, and find professionals
-          </p>
-        </div>
+        <h1 className="text-3xl font-bold mb-4">Welcome back, Aastha!</h1>
 
-        {/* PERSONAL DETAILS - UPDATED LOCATION DISPLAY */}
+        {/* PERSONAL DETAILS */}
         {activeTab === "details" && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -285,7 +248,7 @@ export default function CustomerDashboard() {
                     />
                   </div>
 
-                  {/* Location Section - Simplified Display */}
+                  {/* Location Section */}
                   <div className="border-t border-gray-200 pt-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                       <Navigation size={18} />
@@ -324,7 +287,7 @@ export default function CustomerDashboard() {
 
                 {/* Right: Profile Picture */}
                 <div className="flex flex-col items-center">
-                  <div className="relative w-48 h-48 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden shadow-lg border-8 border-white">
+                  <div className="relative w-48 h-48 rounded-full bg-linear-to-br from-gray-100 to-gray-200 overflow-hidden shadow-lg border-8 border-white">
                     {isEditing ? (
                       <label className="cursor-pointer w-full h-full flex items-center justify-center">
                         <input
@@ -345,7 +308,7 @@ export default function CustomerDashboard() {
                             <Edit2 size={24} className="text-white" />
                           </div>
                           <p className="text-sm font-medium text-gray-700">Click to upload</p>
-                          <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 2MB</p>
+                          <p className="text-xs text-gray-500 mt-1">PNG, JPG Max-5MB</p>
                         </div>
                       </label>
                     ) : (
@@ -400,7 +363,7 @@ export default function CustomerDashboard() {
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-4 flex-1">
                             <div className="relative shrink-0">
-                              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white text-lg font-bold">
+                              <div className="w-16 h-16 rounded-full bg-linear-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white text-lg font-bold">
                                 {p.name.split(" ").map((n) => n[0]).join("")}
                               </div>
                               <div className={`absolute bottom-1 right-1 w-3 h-3 rounded-full border-2 border-white ${p.online ? 'bg-green-500' : 'bg-gray-400'}`} />
@@ -422,7 +385,7 @@ export default function CustomerDashboard() {
                               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-3">
                                 <span className="flex items-center gap-1">
                                   <MapPin size={12} />
-                                  {p.distance} away
+                                  {p.distance}
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <Award size={12} />
@@ -450,16 +413,16 @@ export default function CustomerDashboard() {
                             </div>
                           </div>
 
-                          {/* Action Buttons - Compact */}
+                          {/* Action Buttons  */}
                           <div className="flex flex-col gap-2 shrink-0 ml-4">
                             <a
                               href={`tel:${p.phone}`}
-                              className="flex items-center justify-center gap-1.5 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
                             >
-                              <FaPhone className="rotate-90 text-xs" />
-                              <span>Call</span>
+                            <div className="gap-1.5 px-4 py-4 bg-linear-to-r from-green-500 to-emerald-600 rounded-lg flex items-center justify-center text-white font-medium hover:from-green-600 hover:to-emerald-700 transition-colors text-medium-bold">
+                                      <FaPhone size={14} className="text-white text-base rotate-90" />
+                                      <span>Call</span>
+                            </div>
                             </a>
-                            
                             <button
                               onClick={() => alert(`Marked ${p.name}'s request as completed!`)}
                               className="flex items-center justify-center gap-1.5 px-4 py-2 bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors text-sm font-medium border border-gray-300"
@@ -479,10 +442,6 @@ export default function CustomerDashboard() {
                             {open ? 'Show Less Details' : 'Show More Details'}
                             <span className="text-xs">{open ? '▲' : '▼'}</span>
                           </button>
-                          
-                          <span className={`text-xs px-2 py-1 rounded ${p.online ? 'text-green-600 bg-green-50' : 'text-gray-500 bg-gray-100'}`}>
-                            {p.online ? '● Online' : '○ Offline'}
-                          </span>
                         </div>
                       </div>
 
@@ -579,81 +538,336 @@ export default function CustomerDashboard() {
           </div>
         )}
 
-        {/* BROWSE SERVICES - WITH UPDATED SERVICE NAMES */}
+        {/* BROWSE SERVICES */}
         {activeTab === "services" && (
-          <div>
-            <div className="mb-8">
-              <h3 className="text-2xl font-bold text-gray-900">Browse Services</h3>
-              <p className="text-gray-600 mt-2">
-                Discover and book professional services in your area
-              </p>
-            </div>
+          <>
+            {/* If no category is selected, show the services grid */}
+            {!selectedCategory ? (
+              <div className="mb-8">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                  Browse Services
+                </h1>
+                <p className="text-gray-600 mb-6">
+                  Choose a service to find professionals
+                </p>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 mt-4">
+                  {SERVICES.map(service => (
+                    <motion.div 
+                      key={service.id} 
+                      whileHover={{ scale: 1.03 }} 
+                      whileTap={{ scale: 0.98 }}
+                      className={`bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl ${selectedCategory.toLowerCase() === service.title.toLowerCase() ? 'ring-2 ring-gray-900' : ''}`}
+                      onClick={() => handleCategoryClick(service)}
+                    >
+                      <div className="relative overflow-hidden h-36">
+                        <img 
+                          src={service.img} 
+                          alt={service.title} 
+                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" 
+                        />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent"></div>
+                      </div>
+                      <div className="p-4 text-center bg-linear-to-b from-white to-gray-50">
+                        <p className="font-bold text-gray-900 text-lg">{service.title}</p>
+                        <p className="text-sm text-gray-600 mt-1">Tap to view providers</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              /* If a category IS selected, show providers list */
+              <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
+                {/* Header with Back Button */}
+                <div className="max-w-6xl mx-auto mb-6">
+                  <div className="mb-6">
+                    <button 
+                      onClick={() => {
+                        setSelectedCategory("");
+                        navigate("/customer-dashboard");
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors mb-4"
+                    >
+                      ← Back to Services
+                    </button>
+                    
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                      {selectedCategory} Services Available
+                    </h1>
+                  </div>
+                </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-              {SERVICES.map((service) => (
-                <motion.div
-                  key={service.id}
-                  whileHover={{ scale: 1.03, y: -3 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="bg-white rounded-xl shadow border border-gray-200 overflow-hidden cursor-pointer group hover:shadow-lg transition-all duration-300"
-                  onClick={() => {
-                    // Create a URL-friendly slug (e.g. "Home Tutors" -> "home-tutors")
-                    const slug = service.title.toLowerCase().replace(/\s+/g, "-");
-                    // Navigate to the route param (/:category) and also pass the readable title in state
-                    navigate(`/service-request/${encodeURIComponent(slug)}`, {
-                      state: { category: service.title },
-                      replace: false,
-                    });
-                  }}
-                >
-                  <div className="relative h-36 overflow-hidden">
-                    <img
-                      src={service.img}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      alt={service.title}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-                  <div className="p-4 text-center">
-                    <p className="font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">
-                      {service.title}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">Tap to book</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
+                {/* Providers List */}
+                <div className="max-w-6xl mx-auto">
+                  {providers.length === 0 ? (
+                    <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+                      <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gray-100 flex items-center justify-center">
+                        <FaMapMarkerAlt className="text-gray-400 text-2xl" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-3">No {selectedCategory} Available</h3>
+                      <p className="text-gray-600 mb-8">Try searching in a different area or check back later.</p>
+                      <button 
+                        onClick={() => setSelectedCategory("")}
+                        className="px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-colors shadow-md hover:shadow-lg"
+                      >
+                        Browse Other Services
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {providers.map((provider, index) => {
+                        const open = expandedIds.includes(provider.id);
+                        
+                        // Create enhanced provider data with different pricing scenarios
+                        const enhancedProvider = {
+                          ...provider,
+                          rating: 4.5, 
+                          totalServices: 24, 
+                          ratedServices: 18, 
+                          distance: "2.5 km", 
+                          address: "Kathmandu metropolitan city ward no.03, kathmandu , Nepal",
+                          skills: index === 0 ? [
+                            { name: "Basic Pipe Repair", price: "रु 450" },
+                            { name: "Leak Detection & Fix", price: "रु 800" },
+                            { name: "Drain Cleaning", price: "रु 1,000" },
+                            { name: "Water Heater Installation", price: "रु 2,500" },
+                            { name: "Bathroom Plumbing", price: "रु 1,500" },
+                            { name: "Tap & Fixture Installation", price: "रु 350" }
+                          ] : index === 1 ? [
+
+                          ] : [
+                            { name: "Industrial Pipe Fitting", price: "रु 1,200" },
+                            { name: "Sewage System Repair", price: "रु 2,000+" },
+                            { name: "Water Pump Installation", price: "रु 1,800" },
+                            { name: "Complete Plumbing Setup", price: "" }
+                          ],
+                          online: index < 2,
+                        };
+                        
+                        // Check if this provider has no pricing at all
+                        const hasNoPricing = enhancedProvider.skills.every(skill => !skill.price || skill.price === "");
+                        
+                        return (
+                          <motion.div
+                            key={provider.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300"
+                          >
+                            {/* Main Card Content */}
+                            <div className="p-6 md:p-8">
+                              <div className="flex flex-col lg:flex-row gap-8">
+                                {/* Left: Provider Info */}
+                                <div className="flex-1">
+                                  <div className="flex items-start gap-6">
+                                    {/* Avatar with Online Status */}
+                                    <div className="relative">
+                                      <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-linear-to-br from-gray-900 to-gray-700 flex items-center justify-center text-white text-2xl font-bold shadow-xl relative">
+                                        {provider.name.split(" ").map((n) => n[0]).join("")}
+                                      </div>
+                                      {/* Online Status Badge */}
+                                      <div className={`absolute -bottom-2 left-1/2 transform -translate-x-1/2 flex items-center gap-1 px-3 py-1 rounded-full ${enhancedProvider.online ? 'bg-green-100' : 'bg-gray-100'} border ${enhancedProvider.online ? 'border-green-200' : 'border-gray-200'}`}>
+                                        <div className={`w-2 h-2 rounded-full ${enhancedProvider.online ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
+                                        <span className={`text-xs font-semibold ${enhancedProvider.online ? 'text-green-700' : 'text-gray-600'}`}>
+                                          {enhancedProvider.online ? 'Online' : 'Offline'}
+                                        </span>
+                                      </div>
+                                    </div>
+
+                                    {/* Basic Info */}
+                                    <div className="flex-1">
+                                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                                        <div>
+                                          <h2 className="text-2xl font-bold text-gray-900">{provider.name}</h2>
+                                          <div className="flex items-center gap-2 mt-1">
+                                            <FaMapMarkerAlt className="text-red-500 text-sm" />
+                                            <span className="text-gray-600 text-sm">{enhancedProvider.distance} away • {enhancedProvider.address}</span>
+                                          </div>
+                                        </div>
+                                        
+                                      </div>
+
+                                      {/* Experience and Services */}
+                                      <div className="flex flex-wrap items-center gap-4 mb-4">
+                                        <div className="flex items-center gap-2 bg-yellow-50 px-4 py-2 rounded-xl">
+                                          <FaStar className="text-yellow-500 text-sm" />
+                                          <div>
+                                            <div className="font-bold text-gray-900">{enhancedProvider.rating}</div>
+                                            <div className="text-xs text-gray-500">Rating</div>
+                                          </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-xl">
+                                          <FaBriefcase className="text-gray-600" />
+                                          <div>
+                                            <div className="font-bold text-gray-900">{provider.experience}</div>
+                                            <div className="text-xs text-gray-500">Experience</div>
+                                          </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-xl">
+                                          <div>
+                                            <div className="font-bold text-gray-900">{enhancedProvider.totalServices}</div>
+                                            <div className="text-xs text-gray-500">Total Services</div>
+                                          </div>
+                                        </div>
+                                        <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-xl">
+                                          <div>
+                                            <div className="font-bold text-gray-900">{enhancedProvider.ratedServices}</div>
+                                            <div className="text-xs text-gray-500">Rated recieved</div>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* Bio */}
+                                      <p className="text-gray-700 mb-5">{provider.bio}</p>
+
+                                      {/* Skills Preview */}
+                                      <div className="flex flex-wrap gap-2">
+                                        {enhancedProvider.skills.slice(0, 4).map((skill, index) => (
+                                          <span
+                                            key={index}
+                                            className="px-4 py-2 rounded-lg font-semibold bg-linear-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100"
+                                          >
+                                            {skill.name}
+                                          </span>
+                                        ))}
+                                        {enhancedProvider.skills.length > 4 && (
+                                          <span className="px-4 py-2 font-semibold text-gray-500">
+                                            +{enhancedProvider.skills.length - 4} more
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Right: Action Buttons */}
+                                <div className="lg:w-80 flex flex-col gap-4">
+                                  {/* Call Button Section */}
+                                  <div className="bg-linear-to-r from-green-50 to-emerald-50 rounded-2xl p-3 border border-green-100">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-10 h-10 rounded-lg bg-linear-to-r from-green-500 to-emerald-600 flex items-center justify-center">
+                                        <FaPhone className="text-white text-base rotate-90" />
+                                      </div>
+                                      <div>
+                                        <p className="text-lg font-bold text-gray-900">
+                                          {provider.phone.replace('+977', '').replace(/(\d{2})(\d{3})(\d{4})/, '$1-$2-$3')}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <a
+                                      href={`tel:${provider.phone.replace(/\s+/g, '')}`}
+                                      className="flex items-center gap-1.5 px-4 py-2 bg-linear-to-r from-green-500 to-emerald-600 text-white font-bold rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all shadow hover:shadow-md transform hover:-translate-y-0.5 text-sm"
+                                    >
+                                      <span>CALL NOW</span>
+                                      <FaPhone className="text-sm rotate-90" />
+                                    </a>
+                                  </div>
+                                </div>
+
+                                  {/* Action Buttons */}
+                                  <div className="space-y-3">
+                                    <button
+                                      onClick={() => alert(`Service request sent to ${provider.name}. They will contact you shortly.`)}
+                                      className="w-full px-6 py-4 bg-black text-white font-bold rounded-xl hover:bg-gray-800 transition-colors shadow-lg hover:shadow-xl"
+                                    >
+                                      Send Request
+                                    </button>
+     
+                                    <div className="w-full text-center">
+                                    <button
+                                      onClick={() => toggleExpand(provider.id)}
+                                      className="inline-flex items-center gap-1 text-gray-600 hover:text-gray-900 hover:underline transition-colors text-sm font-medium"
+                                    >
+                                      <span>{open ? 'Hide Details' : 'View Details'}</span>
+                                      {open ? <FaChevronUp size={14} /> : <FaChevronDown size={10} />}
+                                    </button>
+                                  </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Expanded Details */}
+                              {open && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: 'auto' }}
+                                  className="mt-8 pt-8 border-t border-gray-200"
+                                >
+                                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                    {/* Services & Pricing */}
+                                    <div className="lg:col-span-2">
+                                      <h3 className="text-xl font-bold text-gray-900 mb-6">Services & Pricing</h3>
+
+                                      <div className="overflow-x-auto">
+                                        <table className="w-full border border-gray-200 rounded-lg overflow-hidden">
+                                          <thead className="bg-gray-100">
+                                            <tr>
+                                              <th className="text-left px-4 py-3 text-sm font-semibold text-gray-700 border-b">
+                                                Service
+                                              </th>
+                                              <th className="text-right px-4 py-3 text-sm font-semibold text-gray-700 border-b">
+                                                Price
+                                              </th>
+                                            </tr>
+                                          </thead>
+
+                                          <tbody>
+                                            {enhancedProvider.skills.map((skill, index) => (
+                                              <tr
+                                                key={index}
+                                                className="hover:bg-gray-50 transition-colors"
+                                              >
+                                                <td className="px-4 py-3 text-sm text-gray-800 border-b">
+                                                  {skill.name}
+                                                </td>
+                                                <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right border-b">
+                                                  {skill.price && skill.price !== "" ? skill.price : "—"}
+                                                </td>
+                                              </tr>
+                                            ))}
+                                          </tbody>
+                                        </table>
+                                      </div>
+
+                                      {/* Note only if provider has NO pricing at all */}
+                                      {hasNoPricing && (
+                                        <div className="mt-6 p-5 bg-yellow-50 border border-yellow-200 rounded-xl">
+                                          <p className="text-yellow-800 font-semibold">
+                                            💡 Note: This professional prefers to provide custom quotes. Contact directly for pricing.
+                                          </p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
   );
 }
 
-/* PREMIUM COMPONENTS */
-
 function SidebarItem({ icon, label, active, onClick, badge }) {
   return (
-    <button
-      onClick={onClick}
-      className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 ${
-        active
-        ? "bg-gray-900 text-white shadow"
-        : "hover:bg-gray-100 text-gray-700 hover:text-gray-900"
-      }`}>
+    <button onClick={onClick} className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 ${active ? "bg-gray-900 text-white shadow" : "hover:bg-gray-100 text-gray-700 hover:text-gray-900"}`}>
       <div className="flex items-center gap-3">
-        <div className={`p-2 rounded-lg ${active ? 'bg-white/20' : 'bg-gray-100'}`}>
-          {icon}
-        </div>
+        <div className={`p-2 rounded-lg ${active ? 'bg-white/20' : 'bg-gray-100'}`}>{icon}</div>
         <span className="font-medium">{label}</span>
       </div>
-      {badge !== null && (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          active ? 'bg-white/20' : 'bg-gray-100 text-gray-700'
-        }`}>
-          {badge}
-        </span>
-      )}
+      {badge !== undefined && <span className={`px-2 py-1 rounded-full text-xs font-medium ${active ? 'bg-white/20' : 'bg-gray-100 text-gray-700'}`}>{badge}</span>}
     </button>
   );
 }
@@ -670,9 +884,9 @@ function ServiceReviewCard({ service }) {
       <div className="flex flex-col sm:flex-row sm:items-start gap-6">
         <div className="flex-1">
           <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-            {/* Provider Info */}
+            {/* Provider Info with Profile Picture */}
             <div className="shrink-0">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white text-lg font-bold">
+              <div className="w-16 h-16 rounded-full bg-linear-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white text-lg font-bold">
                 {service.provider.split(" ").map((n) => n[0]).join("")}
               </div>
             </div>

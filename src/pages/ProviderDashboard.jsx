@@ -147,7 +147,7 @@ export default function ProviderDashboard() {
       <div className="lg:w-80 bg-white p-6 shadow-lg border-r border-gray-200 flex flex-col">
         <div className="text-center mb-8">
           <div className="relative w-32 h-32 mx-auto mb-4">
-            <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+            <div className="w-full h-full rounded-full bg-linear-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
               RS
             </div>
             <div className="absolute -bottom-2 right-2 w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center shadow-md border-4 border-white">
@@ -279,13 +279,6 @@ export default function ProviderDashboard() {
                       onChange={(e) => setPhone(e.target.value)}
                       type="tel"
                     />
-                    <InfoField
-                      label="Service Category"
-                      value={profile.serviceCategory}
-                      isEditing={isEditing}
-                      type="text"
-                      disabled={true}
-                    />
                   </div>
 
                   {/* Bio Section */}
@@ -400,7 +393,7 @@ export default function ProviderDashboard() {
 
                 {/* Right: Profile Picture */}
                 <div className="flex flex-col items-center">
-                  <div className="relative w-48 h-48 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden shadow-lg border-8 border-white">
+                  <div className="relative w-48 h-48 rounded-full bg-linear-to-br from-gray-100 to-gray-200 overflow-hidden shadow-lg border-8 border-white">
                     {isEditing ? (
                       <label className="cursor-pointer w-full h-full flex items-center justify-center">
                         <input

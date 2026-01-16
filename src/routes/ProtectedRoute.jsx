@@ -8,13 +8,14 @@ const ProtectedRoute = ({ allowedRole }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
   const allowed = Array.isArray(allowedRole) ? allowedRole : [allowedRole];
+
   const isAllowed = allowed.some(
     (r) => String(r).toLowerCase() === String(role).toLowerCase()
   );
   if (!isAllowed) {
+
     return <Navigate to="/" replace />;
   }
-
   return <Outlet />;
 };
 
