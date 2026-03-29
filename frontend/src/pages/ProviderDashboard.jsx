@@ -1400,7 +1400,9 @@ function ProfileTab({
   setIsEditing,
   handleProfilePicChange
 }) {
-  const API_BASE_URL = "http://localhost:5000/api";
+  fetch('http://localhost:5000/api/sp-service-page/my-details', {
+  headers: { 'Authorization': `Bearer ${token}` }
+})
    console.log("===== PROFILE TAB RENDER =====");
    const getProfileImageSrc = () => {
     if (!profilePic) return null;
