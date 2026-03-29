@@ -34,17 +34,21 @@ L.Icon.Default.mergeOptions({
 });
 const getProviderImageUrl = (photoPath) => {
   if (!photoPath) return null;
+
+  // ✅ Fix: replace any localhost URL with the actual deployed server
+  if (photoPath.startsWith('http://localhost') || photoPath.startsWith('https://localhost')) {
+    const serverBase = API_BASE_URL.replace(/\/api.*$/i, '');
+    const pathMatch = photoPath.match(/\/uploads\/.+/);
+    if (pathMatch) return `${serverBase}${pathMatch[0]}`;
+  }
+
   if (photoPath.startsWith('http') || photoPath.startsWith('data:')) return photoPath;
-  
+
   const serverBase = API_BASE_URL.replace(/\/api.*$/i, '');
-  
   let cleanPath = photoPath.replace(/\\/g, '/').replace(/\/+/g, '/');
   cleanPath = cleanPath.replace(/^\.+/, '');
-  
-  if (!cleanPath.startsWith('/')) {
-    cleanPath = '/' + cleanPath;
-  }
-  
+  if (!cleanPath.startsWith('/')) cleanPath = '/' + cleanPath;
+
   return `${serverBase}${cleanPath}`;
 };
 
@@ -1342,7 +1346,7 @@ const stopLocationUpdates = () => {
 };
 
 
-  // Process provider data from API - UPDATED for your schema
+  // Process provider data from API 
   const processProvider = (provider, index) => {
   console.log("Processing provider:", provider); // Debug log to see what we're getting
   
@@ -2497,7 +2501,7 @@ const renderStars = (rating) => {
                                         <div className="relative">
                                            {processedProvider.profilePhoto ? (
                                           <img
-                                                src={getProviderImageUrl(processedProvider.profilePhoto)}
+                                                src={processedProvider.profilePhoto}
                                                 alt={processedProvider.name}
                                                 className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover shadow-xl"
                                                 onError={(e) => {
